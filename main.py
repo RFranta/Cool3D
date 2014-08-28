@@ -1,3 +1,38 @@
+# -*- coding: utf-8 -*-'
+
+#nesforge: add fully unicode support
+######### UNICODE FIX ##################
+"""
+
+The issue was with input data and url encoding.
+
+ Solutions:
+
+ 	1. Input data.
+ 	  To save original code structure just covert strins by unicode() methd.
+ 		title = req.get('title')
+ 		title = title and unicode(title) # convert if exist
+
+ 	2. Url encoding.urllib.urlencode(dict(
+ 	  I dared to delete horoble original query_string's
+ 	  and replace it with 'urllib.urlencode({})' cuz it looks more pythonic
+
+ 	  	urllib.urlencode(dict(
+ 	  		title = title and title.encode('utf-8') or '' # check if exist for any case
+ 	  	))
+
+
+Fix list:
+
+line 1942 to 1954
+line 6094 to 6144
+line 6520 to 6590
+line 6687 to 6711
+
+
+"""
+########################################
+
 from __future__ import with_statement
 import os
 import webapp2
@@ -50,14 +85,14 @@ page_url = data.page_url()
 URL_CHECK_HEADERS = {
 	'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
 	}
-ALLOWED_IMAGE_EXTENTIONS = ["jpg", "jpeg", "gif", "png", "bmp"]
-ALLOWED_ALTERNATE_FILE_EXTENTIONS = ["stl", "scad"] # IMPORTANT: when changing these, you need to add them to the regex in "jquery.fileupload-validate.js" on line 63
+ALLOWED_IMAGE_EXTENTIONS = ['png','jpg','jpeg','bmp']
+ALLOWED_ALTERNATE_FILE_EXTENTIONS = ['stl', 'scad']
 MAX_FILE_SIZE_FOR_OBJECTS = 5242880
 NUMBER_OF_MINUTES_BETWEEN_FRONT_PAGE_UPDATES = 15
 mkd = markdown2.Markdown()
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(extensions=['jinja2.ext.with_'],
-	loader = jinja2.FileSystemLoader(template_dir), 
+	loader = jinja2.FileSystemLoader(template_dir),
 	autoescape = True)
 upload_url = blobstore.create_upload_url('/upload')
 
@@ -65,10 +100,10 @@ upload_url = blobstore.create_upload_url('/upload')
 MIN_FILE_SIZE = 1  # bytes
 MAX_FILE_SIZE = 10000000  # bytes
 IMAGE_TYPES = re.compile('image/(gif|p?jpeg|(x-)?png)')
-STL_TYPE = 'application/octet-stream' or 'application/sla' or 'application/vnd.ms-pki.stl' 
+STL_TYPE = 'application/octet-stream' or 'application/sla' or 'application/vnd.ms-pki.stl'
 ACCEPT_FILE_TYPES = IMAGE_TYPES
-IMAGE_EXTENTION_LIST = ALLOWED_IMAGE_EXTENTIONS #redundant, but i don't want to mess with the jquery code for multiple uploads
-FILE_EXTENTION_LIST = ALLOWED_ALTERNATE_FILE_EXTENTIONS
+IMAGE_EXTENTION_LIST = ["jpg", "jpeg", "gif", "png"]
+FILE_EXTENTION_LIST = ["stl"]
 ACCEPT_FILE_TYPE_LIST = IMAGE_EXTENTION_LIST + FILE_EXTENTION_LIST
 IMAGE_TYPES_LIST = ["image/" + x for x in IMAGE_EXTENTION_LIST]
 STL_TYPE_LIST = ['application/octet-stream' , 'application/sla' , 'application/vnd.ms-pki.stl' ]
@@ -100,7 +135,7 @@ class Handler(webapp2.RequestHandler):
 		self.response.headers.add_header(
 			'Set-Cookie',
 			'%s=%s; expires=%s; Path=/' % (name, cookie_val, expiration_time)
-			)		
+			)
 
 	def read_secure_cookie(self, cookie_name):
 		cookie_val = self.request.cookies.get(cookie_name)
@@ -130,7 +165,7 @@ class Handler(webapp2.RequestHandler):
 				if user_var:
 					return user_var
 				else:
-					logging.warning("User does not exist even though hash is correct, probably local server issues (deleteing a user, but not the cookie")
+					logging.warning(u"Uživatel neexistuje")
 					return None
 			else:
 				self.logout()
@@ -153,12 +188,12 @@ class Handler(webapp2.RequestHandler):
 
 	def login(self, user):
 		self.set_secure_cookie('user_id', str(user.key().id()))
-		self.set_secure_cookie('username', str(user.username))
+		self.set_secure_cookie('username', urllib.quote_plus(user.username.encode('utf-8')))
 		self.set_secure_cookie('over18', str(user.over18))
 
 	def login_and_remember(self, user):
 		self.set_secure_cookie_with_expiration('user_id', str(user.key().id()))
-		self.set_secure_cookie_with_expiration('username', str(user.username))
+		self.set_secure_cookie('username', urllib.quote_plus(user.username.encode('utf-8')))
 		self.set_secure_cookie_with_expiration('over18', str(user.over18))
 
 	def logout(self):
@@ -193,7 +228,7 @@ class ObjectUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 		self.response.headers.add_header(
 			'Set-Cookie',
 			'%s=%s; expires=%s; Path=/' % (name, cookie_val, expiration_time)
-			)		
+			)
 
 	def read_secure_cookie(self, cookie_name):
 		cookie_val = self.request.cookies.get(cookie_name)
@@ -222,7 +257,7 @@ class ObjectUploadHandler(blobstore_handlers.BlobstoreUploadHandler):
 				if user_var:
 					return user_var
 				else:
-					logging.warning("User does not exist even though hash is correct, probably local server issues (deleteing a user, but not the cookie")
+					logging.warning(u"Uživatel neexistuje")
 					return None
 			else:
 				self.logout()
@@ -264,12 +299,12 @@ def random_string_generator(size = random.randint(15, 20),
 ####################### DB Models #######################
 # do not use functions as defaults
 DB_TYPE_LIST = [
-	"Users", 
-	"Objects", 
-	"Comments", 
-	"Messages", 
-	"UserBlob", 
-	"ObjectBlob", 
+	"Users",
+	"Objects",
+	"Comments",
+	"Messages",
+	"UserBlob",
+	"ObjectBlob",
 	"WikiEntry"]
 DAY_SCALE = 2 # 2 days
 DAYS_TIL_DECLINE = 4 #also again below
@@ -285,23 +320,15 @@ class Users(db.Model):
 
 	summary			= db.TextProperty(default = "")
 	location		= db.StringProperty(default = "")
-	
-	# Pro User Options
 	printer			= db.StringProperty(default = "")
 	slicer			= db.StringProperty(default = "")
-	hotend			= db.StringProperty(default = "")
-	filament_size	= db.StringProperty(default = "")
-	filament_brand	= db.StringProperty(default = "")
-	print_quality	= db.StringProperty(default = "")
-	print_speed		= db.StringProperty(default = "")
 	software		= db.StringProperty(default = "")
-	##
 
 	no_infinite_scroll = db.BooleanProperty(default= False)
 
 	# gamification
 	rate_rep 		= db.IntegerProperty(default = 0)
-	# rate_rep should be king. It works like this: 
+	# rate_rep should be king. It works like this:
 	# it's the sum of all rates -3, so that a rate of 1=-2, 2=-1, 3=0, 4=1, 5=2
 	obj_rep			= db.IntegerProperty(default = 0)
 	com_rep			= db.IntegerProperty(default = 0)
@@ -337,7 +364,7 @@ class Users(db.Model):
 	deleted 			= db.BooleanProperty(default = False)
 	#over18?
 	over18				= db.BooleanProperty(default = False)
-	
+
 	upvotes 			= db.IntegerProperty(default = 0)
 	downvotes 			= db.IntegerProperty(default = 0)
 	num_of_rates 		= db.IntegerProperty(default = 0)
@@ -353,7 +380,7 @@ class Users(db.Model):
 	main_img_filename 	= db.StringProperty()
 	main_img_blobkey 	= blobstore.BlobReferenceProperty()
 
-	# to be deleted 
+	# to be deleted
 	main_img_blob_key	= db.StringProperty()
 	#
 
@@ -403,7 +430,7 @@ class Objects(db.Model):
 
 	most_recent_comment_epoch = db.FloatProperty(default=0.00)
 	total_num_of_comments = db.IntegerProperty(default = 0)
-	
+
 	# someone else's work?
 	original_creator	= db.StringProperty()
 
@@ -498,17 +525,17 @@ class Objects(db.Model):
 	licence				= db.StringProperty() # spelling: license (american) licence (rest of world)
 	license 			= db.StringProperty()
 	# for Link/Tor Objects
-	obj_link			= db.StringProperty() 
+	obj_link			= db.StringProperty()
 
 	# optional
 	description 			= db.TextProperty()
 	markdown 				= db.TextProperty()
-	
+
 	# tags
 	tags 					= db.StringListProperty()
 	author_tags				= db.StringListProperty()
 	public_tags				= db.StringListProperty()
-	
+
 	upvotes 				= db.IntegerProperty(default = 1)
 	downvotes 				= db.IntegerProperty(default = 0)
 	netvotes 				= db.IntegerProperty()
@@ -521,13 +548,13 @@ class Objects(db.Model):
 	# voting section:
 	##### keep
 	global DAY_SCALE
-	rank					= db.StringProperty()	
+	rank					= db.StringProperty()
 	votesum					= db.IntegerProperty(default = 1)
 	#####
 	#creation_order			= db.StringProperty(default=" ")
 	#created_int				= db.IntegerProperty(default=0)
 	num_user_when_created 	= db.IntegerProperty()
-	
+
 	# chached vote/rate/flag section:
 	voter_list				= db.ListProperty(int)
 	voter_vote				= db.StringListProperty()
@@ -545,7 +572,7 @@ class Objects(db.Model):
 	#####
 	#creation_order_rate		= db.StringProperty(default=" ")
 	#created_int_rate		= db.IntegerProperty(default=0)
-	
+
 	# flagging section:
 	been_flagged 			= db.BooleanProperty(default=False)
 	flagsum					= db.IntegerProperty(default = 0)
@@ -562,11 +589,11 @@ class Comments(db.Model):
 	# exists?
 	deleted 		= db.BooleanProperty(default = False)
 	washed			= db.BooleanProperty(default = False)
-	
+
 	# comment fundimentals
 	text			= db.TextProperty(required = True)
 	markdown		= db.TextProperty()
-	
+
 	obj_parent		= db.IntegerProperty()
 	com_parent		= db.IntegerProperty()
 	#children		= db.ListProperty(db.Key)
@@ -589,9 +616,9 @@ class Comments(db.Model):
 	flagger_flag			= db.StringListProperty()
 
 	# voting section:
-	rank					= db.StringProperty(default = "%020d" % (DAY_SCALE))	
+	rank					= db.StringProperty(default = "%020d" % (DAY_SCALE))
 	votesum					= db.IntegerProperty(default=0)
-	
+
 	# flagging section:
 	been_flagged 			= db.BooleanProperty(default=False)
 	flagsum					= db.IntegerProperty(default = 0)
@@ -614,11 +641,11 @@ class UserBlob(db.Model):
 	created 	= db.DateTimeProperty(auto_now_add = True)
 	blob_type 	= db.StringProperty(required = True)
 	# blob types:	'image'
-	
+
 	# etc. (to be determined)
 	user_id 	= db.IntegerProperty()
 	uploader 	= db.IntegerProperty() # this is the user_id
-	blob_key 	= blobstore.BlobReferenceProperty() 
+	blob_key 	= blobstore.BlobReferenceProperty()
 	filename	= db.StringProperty()
 
 	deleted 	= db.BooleanProperty(default = False)
@@ -633,7 +660,7 @@ class ObjectBlob(db.Model):
 	# etc. (to be determined)
 	obj_id 		= db.IntegerProperty()
 	uploader 	= db.IntegerProperty() # this is the user_id
-	blob_key 	= blobstore.BlobReferenceProperty() 
+	blob_key 	= blobstore.BlobReferenceProperty()
 	filename	= db.StringProperty()
 
 	deleted 	= db.BooleanProperty(default = False)
@@ -653,6 +680,7 @@ FAKE_NAME_LIST = fake_names.return_names()
 # default task queue url is /_ah/queue/(queue_name_here)
 #########################################################
 ####################### Pages #######################
+
 class AdminPage(Handler):
 	def render_front(self):
 		user = self.return_user_if_cookie()
@@ -715,14 +743,14 @@ class AdminPage(Handler):
 			the_dict = cached_vote_data_for_masonry(the_objects, user_id)
 
 		# Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
-		self.render("admin.html", 
+		self.render("admin.html",
 					user = user,
-					
-					username=active_username, 
+
+					username=active_username,
 					user_id = user_id,
-					the_objects=the_objects, 
-					the_users=the_users, 
-					the_comments=the_comments, 
+					the_objects=the_objects,
+					the_users=the_users,
+					the_comments=the_comments,
 					has_cookie=has_cookie,
 					the_dict = the_dict)
 def admin_page_query():
@@ -799,7 +827,7 @@ class AdminObjPage(Handler):
 			user_id = int(user_id)
 		else:
 			pass
-			
+
 		if has_cookie:
 			user_rate = return_user_rate_from_tuple(obj_id, user_id)
 			flagged_by_user = return_user_flag_from_tuple(obj_id, user_id)
@@ -859,8 +887,8 @@ class AdminObjPage(Handler):
 			comment_triplet_list.append(return_comment_vote_flag_triplet(comment, user_id))
 			#this takes the form (comment, vote_int, flag_int)
 			#logging.warning(comment_triplet_list)
-		
-		self.render('adminobjpage.html', 
+
+		self.render('adminobjpage.html',
 					user = user,
 
 					obj_id = obj_id,
@@ -965,7 +993,7 @@ def load_front_pages_from_memcache_else_query(page_type, page_num, content_type,
 
 		if time_gap_between_cache_updates > last_update:
 			update = True
-	
+
 	if update == True:
 		current_time = time.time()
 
@@ -974,7 +1002,7 @@ def load_front_pages_from_memcache_else_query(page_type, page_num, content_type,
 		number_of_items_to_fetch = 30
 
 		object_query = all_objects_query(content_type)
-		#logging.warning("DB query all_objects_query(%s)" % content_type) 
+		#logging.warning("DB query all_objects_query(%s)" % content_type)
 		object_list = list(object_query)
 
 		applicable_objects = []
@@ -995,7 +1023,7 @@ def load_front_pages_from_memcache_else_query(page_type, page_num, content_type,
 				continue
 		object_list = applicable_objects
 		applicable_objects = []
-		
+
 		for obj in object_list:
 			if content_type == "kids":
 				if obj.okay_for_kids == True:
@@ -1034,12 +1062,12 @@ def load_front_pages_from_memcache_else_query(page_type, page_num, content_type,
 			if this_pages_number == 0:
 				continue
 			#print "\n", "this page's number:", this_pages_number, "\n"
-			
+
 			# now back to normal counting
 			the_objects = object_list[( (this_pages_number -1) * number_of_items_to_fetch) : (this_pages_number * number_of_items_to_fetch)]
-			
+
 			#print "\n", the_objects, "\n"
-			
+
 			if not the_objects: # If the objects is an empty list
 				end_of_content = True
 
@@ -1068,7 +1096,7 @@ def update_front_page_memcache_for_specific_object(obj_id, page_type, content_ty
 	obj = return_thing_by_id(obj_id, "Objects")
 	if not obj:
 		logging.error("no object for update_front_page_memcache_for_specific_object")
-		return 
+		return
 
 	if page_type == "/":
 		page_cache_key_prefix = "front_page"
@@ -1122,7 +1150,7 @@ class FrontHandler(Handler):
 		user_id = self.check_cookie_return_val("user_id")
 		current_time = time.time()
 		#print "The time is:", current_time
-		
+
 		content_type = "kids"
 		over18 = self.check_cookie_return_val("over18")
 		if over18 == "True":
@@ -1141,7 +1169,7 @@ class FrontHandler(Handler):
 			if len(the_dict) == 0:
 				end_of_content = True
 
-			self.render("front_infinite.html", 
+			self.render("front_infinite.html",
 						user = user,
 						user_id = user_id,
 
@@ -1160,7 +1188,7 @@ class FrontHandler(Handler):
 
 		############### nothing below is launched ###############
 
-		# object_query = all_objects_query(content_type)		
+		# object_query = all_objects_query(content_type)
 		# object_pages = ["/objects"]
 
 		# cursor_url = None
@@ -1271,7 +1299,7 @@ class FrontHandler(Handler):
 
 		# everything_pages = ["/", "/recentcommentsmain", "/newmain", "/topmain"]
 		# if page_type in everything_pages:
-		# 	self.render("front_infinite.html", 
+		# 	self.render("front_infinite.html",
 		# 				user = user,
 		# 				user_id = user_id,
 
@@ -1288,7 +1316,7 @@ class FrontHandler(Handler):
 		# 				)
 		# 	return
 		# elif page_type == "/objects":
-		# 	self.render("front.html", 
+		# 	self.render("front.html",
 		# 				user = user,
 		# 				user_id = user_id,
 
@@ -1347,7 +1375,7 @@ class FrontHandler(Handler):
 		# 				ADMIN_USERNAMES = ADMIN_USERNAMES,
 		# 				FAKE_NAME_LIST = FAKE_NAME_LIST,
 		# 				)
-		# 	return			
+		# 	return
 
 		# elif page_type == "/university":
 		# 	self.render("uni_front.html",
@@ -1392,7 +1420,7 @@ class FrontHandler(Handler):
 		# 				ADMIN_USERNAMES = ADMIN_USERNAMES,
 		# 				FAKE_NAME_LIST = FAKE_NAME_LIST,
 		# 				)
-		# 	return			
+		# 	return
 
 		# elif page_type == "/video":
 		# 	self.render("uni_front_video.html",
@@ -1407,7 +1435,7 @@ class FrontHandler(Handler):
 		# 				ADMIN_USERNAMES = ADMIN_USERNAMES,
 		# 				FAKE_NAME_LIST = FAKE_NAME_LIST,
 		# 				)
-		# 	return	
+		# 	return
 class MainEverything(FrontHandler):
 	def get(self, page_num = "1"):
 		self.render_front_page('/', page_num = page_num)
@@ -1428,7 +1456,7 @@ class MainPageObjects(FrontHandler):
 		# if over18 == "True":
 		# 	over18 = True
 		# 	content_type = "sfw"
-		
+
 		# object_query = front_page_cache(content_type)
 		# cursor = self.request.get("cursor")
 		# if cursor:
@@ -1439,7 +1467,7 @@ class MainPageObjects(FrontHandler):
 
 		# the_users = users_cache()
 		# the_comments = comments_cache()
-		
+
 		# # reset rank for live adjustment
 		# for obj in the_objects:
 		# 	obj.rank = return_rank(obj)
@@ -1454,14 +1482,14 @@ class MainPageObjects(FrontHandler):
 
 		# # Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
 		# logging.warning(random_string_generator())
-		# self.render("front.html", 
+		# self.render("front.html",
 		# 			user = user,
-					
-		# 			username=active_username, 
+
+		# 			username=active_username,
 		# 			user_id = user_id,
-		# 			the_objects=the_objects, 
-		# 			the_users=the_users, 
-		# 			the_comments=the_comments, 
+		# 			the_objects=the_objects,
+		# 			the_users=the_users,
+		# 			the_comments=the_comments,
 		# 			has_cookie=has_cookie,
 		# 			over18 = over18,
 		# 			the_dict = the_dict,
@@ -1494,7 +1522,7 @@ class MainPageRecentComments(FrontHandler):
 		# if over18 == "True":
 		# 	over18 = True
 		# 	content_type = "sfw"
-		
+
 		# object_query = front_page_cache(content_type)
 		# cursor = self.request.get("cursor")
 		# if cursor:
@@ -1505,7 +1533,7 @@ class MainPageRecentComments(FrontHandler):
 
 		# the_users = users_cache()
 		# the_comments = comments_cache()
-		
+
 		# # reset rank for live adjustment
 		# for obj in the_objects:
 		# 	obj.rank = return_rank(obj)
@@ -1520,14 +1548,14 @@ class MainPageRecentComments(FrontHandler):
 
 		# # Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
 		# logging.warning(random_string_generator())
-		# self.render("front.html", 
+		# self.render("front.html",
 		# 			user = user,
-					
-		# 			username=active_username, 
+
+		# 			username=active_username,
 		# 			user_id = user_id,
-		# 			the_objects=the_objects, 
-		# 			the_users=the_users, 
-		# 			the_comments=the_comments, 
+		# 			the_objects=the_objects,
+		# 			the_users=the_users,
+		# 			the_comments=the_comments,
 		# 			has_cookie=has_cookie,
 		# 			over18 = over18,
 		# 			the_dict = the_dict,
@@ -1559,7 +1587,7 @@ class MainPageNew(FrontHandler):
 		# if over18 == "True":
 		# 	over18 = True
 		# 	content_type = "sfw"
-		
+
 		# object_query = front_page_cache_new(content_type)
 		# cursor = self.request.get("cursor")
 		# if cursor:
@@ -1570,19 +1598,19 @@ class MainPageNew(FrontHandler):
 
 		# the_users = users_cache()
 		# the_comments = comments_cache()
-		
+
 
 		# the_dict = cached_vote_data_for_masonry(the_objects, user_id)
 		# # Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
 		# logging.warning(random_string_generator())
-		# self.render("front.html", 
+		# self.render("front.html",
 		# 			user = user,
-					
-		# 			username=active_username, 
+
+		# 			username=active_username,
 		# 			user_id = user_id,
-		# 			the_objects=the_objects, 
-		# 			the_users=the_users, 
-		# 			the_comments=the_comments, 
+		# 			the_objects=the_objects,
+		# 			the_users=the_users,
+		# 			the_comments=the_comments,
 		# 			has_cookie=has_cookie,
 		# 			over18 = over18,
 		# 			the_dict = the_dict,
@@ -1612,7 +1640,7 @@ class MainPageTop(FrontHandler):
 		# if over18 == "True":
 		# 	over18 = True
 		# 	content_type = "sfw"
-		
+
 		# object_query = front_page_cache_top(content_type)
 		# cursor = self.request.get("cursor")
 		# if cursor:
@@ -1623,19 +1651,19 @@ class MainPageTop(FrontHandler):
 
 		# the_users = users_cache()
 		# the_comments = comments_cache()
-		
+
 
 		# the_dict = cached_vote_data_for_masonry(the_objects, user_id)
 		# # Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
 		# logging.warning(random_string_generator())
-		# self.render("front.html", 
+		# self.render("front.html",
 		# 			user = user,
-					
-		# 			username=active_username, 
+
+		# 			username=active_username,
 		# 			user_id = user_id,
-		# 			the_objects=the_objects, 
-		# 			the_users=the_users, 
-		# 			the_comments=the_comments, 
+		# 			the_objects=the_objects,
+		# 			the_users=the_users,
+		# 			the_comments=the_comments,
 		# 			has_cookie=has_cookie,
 		# 			over18 = over18,
 		# 			the_dict = the_dict,
@@ -1692,7 +1720,7 @@ class ThingTracker(Handler):
 		}
 		self.response.out.write(json.dumps(json_obj))
 
-class ObjectPage(Handler):		
+class ObjectPage(Handler):
 	def render_page(self, obj_num, error=""):
 		user = self.return_user_if_cookie()
 
@@ -1815,10 +1843,10 @@ class ObjectPage(Handler):
 			parse = urlparse(obj_link_var)
 			short_url_var = parse[1]
 		else:
-			pass		
+			pass
 
 		description_var = the_obj.description
-		
+
 		description_exists = False
 		long_description = False
 		if the_obj:
@@ -1880,7 +1908,7 @@ class ObjectPage(Handler):
 			other_file_list.append(the_obj.file_link_14)
 		if the_obj.file_link_15:
 			other_file_list.append(the_obj.file_link_15)
-		
+
 		if the_obj.obj_type == "upload":
 			if not the_obj.stl_file_link and not other_file_list:
 				# What has probably happened is that the user just attempted an upload,
@@ -1910,20 +1938,36 @@ class ObjectPage(Handler):
 					audience = "kids"
 				else:
 					audience = "sfw"
-				
+
 				rights = "yes"
 				food_related = the_obj.food_related
 
-				query_string = "title=%s&license=%s&sublicense=%s&rights=%s&audience=%s&food_related=%s&description=%s&tags=%s&creator=%s&is_author=%s" % (title, license, sublicense, rights, audience, str(food_related), description, tags, creator, is_author)
+				#query_string = "title=%s&license=%s&sublicense=%s&rights=%s&audience=%s&food_related=%s&description=%s&tags=%s&creator=%s&is_author=%s" % (title, license, sublicense, rights, audience, str(food_related), description, tags, creator, is_author)
+
+				query_string = urllib.urlencode(dict(
+
+						title = title and title.encode('utf-8') or '',
+						license = license and license.encode('utf-8') or '',
+						sublicense=sublicense and sublicense.encode('utf-8') or '',
+						rights = rights and rights.encode('utf-8') or '',
+						audience=audience and audience.encode('utf-8') or '',
+						food_related=food_related,
+						description=description and description.encode("utf-8") or '',
+						tags=tags and tags.encode('utf-8') or '',
+						creator=creator and creator.encode("utf-8") or '',
+						is_author=is_author and is_author.encode('utf-8') or ''
+				))
+
 				query_string = query_string + "&obj_id=%d" % obj_id
-				error = "You must upload a 3D printable file to continue."
-				error_string = "error_no_file_uploaded=%s" % error
+				error = "Musíte přidat 3D tisknutelný soubor, abyste mohli pokračovat. (možná jste nepočkali, až se soubor plně nahraje,zkuste soubor znovu nahrát)"
+				error_string = "error_no_file_uploaded=%s" % urllib.quote_plus(error)
 				self.redirect("%s?%s&%s" % (redirect_url_path, query_string, error_string))
 				return
 			#################################
 
 		if len(other_file_list) >= 14:
 			file_list_full = True
+
 
 		visitor_img_quad_list = []
 		for a_tuple in the_obj.visitor_img_list:
@@ -1962,8 +2006,8 @@ class ObjectPage(Handler):
 			if user:
 				#####
 				if str(the_com_trip[0].author_id) in user.block_list:
-					the_com_trip[0].text = "You have blocked this user's content."
-					the_com_trip[0].markdown = "You have blocked this user's content."
+					the_com_trip[0].text = u"Zablokoval jste obsah účtu tohoto uživatele."
+					the_com_trip[0].markdown = u"Zablokoval jste obsah účtu tohoto uživatele."
 			comment_triplet_list.append(the_com_trip)
 
 		### end comments section
@@ -1973,10 +2017,10 @@ class ObjectPage(Handler):
 
 		global ADMIN_USERNAMES
 		global FAKE_NAME_LIST
-		
-		self.render('objectpage.html', 
+
+		self.render('objectpage.html',
 					user = user,
-					
+
 					user_hash = user_hash,
 					# This is used in sub.html, so if you change this, you will break subcomments
 					# Also used for other image upload
@@ -2057,7 +2101,7 @@ class ObjectPage(Handler):
 	def get(self, obj_num):
 		obj_id = int(obj_num)
 		self.render_page(obj_num=obj_id)
-	
+
 	def post(self, obj_num):
 		pass # this used to only post comments and subcomments, but i've altered that
 class PostComment(Handler):
@@ -2100,7 +2144,7 @@ class PostComment(Handler):
 		logging.warning(user_hash)
 		logging.warning(verify_hash)
 		if user_hash != verify_hash:
-			logging.error("Someone is trying to hack the comments")
+			logging.error("Nekdo se snazi hackovat tento komentar.")
 			self.error(400)
 			self.redirect(next_url)
 			return
@@ -2112,12 +2156,12 @@ class PostComment(Handler):
 		if comment_var:
 			escaped_comment_text = cgi.escape(comment_var)
 		else:
-			logging.error("Something went wrong with a comment.")
+			logging.error(u"Ups, něco se pokazilo.")
 			self.redirect(next_url)
 			return
 		mkd_converted_comment = mkd.convert(escaped_comment_text)
 		if not mkd_converted_comment:
-			logging.error("Something went wrong with a comment.")
+			logging.error(u"Ups, něco se pokazilo.")
 			self.redirect(next_url)
 			return
 
@@ -2149,7 +2193,7 @@ class PostComment(Handler):
 
 		# put new comment to db
 		new_comment.put()
-		logging.warning('New Comment Created: db put')
+		logging.warning(u'Novy komentář vytvořen: db put')
 
 		# reset cache for object page with new comment
 		# ie this should update obj_com_cache(obj_id)
@@ -2186,7 +2230,7 @@ class PostComment(Handler):
 			if str(obj_author_id) not in user.blocked_by_list:
 				logging.warning('should sleep here')
 				new_note(int(obj_author_id),
-					"Comments|%d|%s| <a href='/user/%s'>%s</a> commented on <a href='/obj/%s'>%s</a>" % (
+					"Comments|%d|%s| <a href='/user/%s'>%s</a> komentovan <a href='/obj/%s'>%s</a>" % (
 							int(new_comment.key().id()),
 								str(time.time()),
 													str(user_id),
@@ -2196,15 +2240,15 @@ class PostComment(Handler):
 					delay=delay)
 			else:
 				# user blocked
-				logging.warning('user blocked, no notification / fake sleep')
+				logging.warning(u'uživatel zablokován')
 				time.sleep(delay)
 				# fake sleep
 
 		else:
 			# object author is commenter
-			logging.warning('%d second sleep for new comment by author' % delay)
+			logging.warning(u'%d sekund pro nový komentář autora' % delay)
 			time.sleep(delay)
-		
+
 		if not cache_reset:
 			# delay has already happened above
 			obj_comments = obj_comment_cache(obj_id, update=True)
@@ -2287,7 +2331,7 @@ class PostSubcomment(Handler):
 		logging.warning(user_hash)
 		logging.warning(verify_hash)
 		if user_hash != verify_hash:
-			logging.error("Someone is trying to hack the comments")
+			logging.error("Nekdo se snazi hackovat tento komentar.")
 			self.error(400)
 			self.redirect(next_url)
 			return
@@ -2298,7 +2342,7 @@ class PostSubcomment(Handler):
 		escaped_comment_text = cgi.escape(subcomment_var)
 		mkd_converted_comment = mkd.convert(escaped_comment_text)
 		if not mkd_converted_comment:
-			logging.error("Something went wrong with a subcomment.")
+			logging.error("Neco se s timto komentarem pokazilo.")
 			self.redirect(next_url)
 			return
 
@@ -2308,7 +2352,7 @@ class PostSubcomment(Handler):
 
 		logging.warning(parent_id)
 		logging.warning(parent_comment)
-		
+
 		new_subcomment = Comments(
 								author_id = user_id,
 								author_name = username_var,
@@ -2329,7 +2373,7 @@ class PostSubcomment(Handler):
 								voter_vote = ["%s|1" % str(user_id)],
 								)
 		new_subcomment.put()
-		logging.warning('New Subcomment Created')
+		logging.warning('Novy podkomentar vytvoren')
 		memcache.set("Comments_%d" % new_subcomment.key().id(), [new_subcomment])
 
 
@@ -2387,7 +2431,7 @@ class PostSubcomment(Handler):
 			if str(parent_comment.author_id) not in user.blocked_by_list:
 				logging.warning('should sleep here')
 				new_note(parent_comment.author_id,
-					"Comments|%d|%s| <a href='/user/%s'>%s</a> has replied to your <a href='/com/%s'>comment</a>" % (
+					"Comments|%d|%s| <a href='/user/%s'>%s</a> odpovedel na Vas <a href='/com/%s'>komentar</a>" % (
 							int(new_subcomment.key().id()),
 								str(time.time()),
 													str(user_id),
@@ -2397,11 +2441,11 @@ class PostSubcomment(Handler):
 					delay=delay)
 			else:
 				# user blocked
-				logging.warning('user blocked, no notification / fake sleep')
+				logging.warning('uzivatel zablokovan, zadne oznameni')
 				time.sleep(delay)
 				# fake sleep
 		else:
-			logging.warning('%d second sleep for new subcomment by same previous comment author' % delay)
+			logging.warning('%d po prvnm komentari stejnym autora' % delay)
 			time.sleep(delay)
 
 		if not cache_reset:
@@ -2524,8 +2568,8 @@ class ObjectEdit(Handler):
 			voted_var = None # this shouldn't even render anyway
 
 		tag_str = ', '.join(tag_var)
-		
-		self.render('objectedit.html', 
+
+		self.render('objectedit.html',
 					obj_id = obj_id,
 					deleted = deleted,
 					rate_avg = rate_avg,
@@ -2577,12 +2621,12 @@ class ObjectEdit(Handler):
 		desc_var = self.request.get('description')
 
 		if not desc_var:
-			logging.error('something fucked up')
+			logging.error('neco se pokazilo')
 			self.redirect('/obj/edit/%d' % obj_id)
 			return
 		#logging.warning('well we got this far')
-		
-		# Now we know we have one form submission and only one.		
+
+		# Now we know we have one form submission and only one.
 		if desc_var:
 			obj = Objects.get_by_id(obj_id)
 			logging.warning('db query -- object edit post descripiton')
@@ -2683,8 +2727,8 @@ class ObjectTagEdit(Handler):
 		tag_str = ', '.join(tag_var)
 		author_tag_str = ', '.join(the_obj.author_tags)
 		public_tag_str = ', '.join(the_obj.public_tags)
-		
-		self.render('object_tag_edit.html', 
+
+		self.render('object_tag_edit.html',
 					obj_id = obj_id,
 					deleted = deleted,
 					rate_avg = rate_avg,
@@ -2751,8 +2795,8 @@ class ObjectTagEdit(Handler):
 			self.redirect('/obj/edit/%d' % obj_id)
 			return
 		#logging.warning('well we got this far')
-		
-		# Now we know we have one form submission and only one.		
+
+		# Now we know we have one form submission and only one.
 		if author_tag_str:
 			tag_list = author_tag_str.split(', ')
 			tag_list = remove_list_duplicates(tag_list)
@@ -2782,8 +2826,8 @@ class ObjectTagEdit(Handler):
 			if int(user_id) == obj.author_id:
 				pass
 			else:
-				new_note(obj.author_id, 
-						"NA| |%s| <a href='/user/%s'>%s</a> edited the public tags on <a href='/obj/%s'>%s</a>" % (
+				new_note(obj.author_id,
+						u"NA| |%s| <a href='/user/%s'>%s</a> upravil veřejné štitky <a href='/obj/%s'>%s</a>" % (
 						str(time.time()),
 											str(user_id),
 												str(cgi.escape(username)),
@@ -2794,10 +2838,10 @@ class ObjectTagEdit(Handler):
 			# something broke
 			logging.error("ERROR -- in object edit post request")
 
-		taskqueue.add(url ='/tagupdateworker', 
+		taskqueue.add(url ='/tagupdateworker',
 					  countdown = 6
 					 )
-					
+
 
 		self.redirect('/obj/%d' % obj_id)
 class AjaxDescriptionEdit(Handler):
@@ -2819,7 +2863,7 @@ class AjaxDescriptionEdit(Handler):
 		user_hash = gen_verify_hash(user)
 		logging.warning(user_hash)
 		if verify != user_hash:
-			logging.warning('someone is attempting to hack a description')
+			logging.warning('nekdo se snaz kackovat tento popis')
 			self.error(400)
 			return
 		obj = return_thing_by_id(obj_id, "Objects")
@@ -2830,7 +2874,7 @@ class AjaxDescriptionEdit(Handler):
 		if not user:
 			logging.error('this is not the user')
 			self.error(400)
-			return	
+			return
 
 		desc_var = self.request.get('description_text')
 
@@ -2838,11 +2882,11 @@ class AjaxDescriptionEdit(Handler):
 			logging.error('no desc_var, setting it to None')
 			desc_var = None
 		#logging.warning('well we got this far')
-		
-		# Now we know we have one form submission and only one.		
+
+		# Now we know we have one form submission and only one.
 		obj = return_thing_by_id(obj_id, "Objects")
 		if obj.description == desc_var:
-			logging.warning("No change to description")
+			logging.warning("Zadna zmena v popisu.")
 			return
 		obj.description = desc_var
 		# Now escape, and save as markdown text
@@ -2856,11 +2900,11 @@ class AjaxTagEdit(Handler):
 		obj_num = self.request.get("obj_num")
 		user_id = self.request.get("user_id")
 		if not obj_num and user_id:
-			logging.error('something fucked up')
+			logging.error('Neco se pokazilo.')
 			self.error(400)
 			return
 
-		obj_id = int(obj_num)			
+		obj_id = int(obj_num)
 
 		user = return_thing_by_id(user_id, "Users")
 		obj = return_thing_by_id(obj_id, "Objects")
@@ -2869,27 +2913,26 @@ class AjaxTagEdit(Handler):
 		user_is_author = False
 		if int(user_id) == obj.author_id:
 			user_is_author = True
-		
+
 		if not user:
-			logging.error('something fucked up')
+			logging.error('Neco se pokazilo.')
 			self.error(400)
 			return
-		
+
 		author_tag_str = None
 		if user_is_author:
 			author_tag_str = self.request.get('author_tags')
-		
+
 		public_tag_str = self.request.get('public_tags')
 
-		#logging.warning('well we got this far')
-		
+		logging.warning(public_tag_str)
+
 		obj = None # reset so obj doesn't reset itself ... maybe unnecessary
-		# Now we know we have one form submission and only one.		
+		# Now we know we have one form submission and only one.
 		if user_is_author:
 			tag_list = author_tag_str.split(', ')
 			tag_list = remove_list_duplicates(tag_list)
 			tag_list = strip_list_whitespace(tag_list)
-			tag_list = remove_unsafe_chars_from_tags(tag_list)
 			tag_list.sort()
 			if not tag_list:
 				tag_list = ["None"]
@@ -2897,7 +2940,7 @@ class AjaxTagEdit(Handler):
 			#logging.warning(tag_list)
 			#logging.warning(obj.author_tags)
 			if tag_list == obj.author_tags:
-				logging.warning('author tags did not change')
+				logging.warning('Autorovy stitky se nezmenily.')
 			else:
 				obj.author_tags = tag_list
 				all_tags = obj.author_tags + obj.public_tags
@@ -2916,17 +2959,17 @@ class AjaxTagEdit(Handler):
 		tag_list = remove_list_duplicates(tag_list)
 		logging.warning(tag_list)
 		tag_list = strip_list_whitespace(tag_list)
-		tag_list = remove_unsafe_chars_from_tags(tag_list)
 		tag_list.sort()
+		logging.warning(tag_list)
 		if not tag_list:
 			tag_list = ["None"]
-			logging.warning("public tag list set to None")
+			logging.warning("Seznam stitku nastaven na zadne.")
 		if not obj:
 			obj = return_thing_by_id(obj_id, "Objects")
 		#logging.warning(tag_list)
 		#logging.warning(obj.public_tags)
 		if tag_list == obj.public_tags:
-			logging.warning('public tags did not change')
+			logging.warning('Verejne stitky se nezmenily.')
 		else:
 			obj.public_tags = tag_list
 			all_tags = obj.author_tags + obj.public_tags
@@ -2935,21 +2978,23 @@ class AjaxTagEdit(Handler):
 			if "None" in all_tags:
 				all_tags.remove("None")
 			obj.tags = all_tags
+			logging.warning('"""""""""""')
+			logging.warning(obj.public_tags)
 			obj.put()
 			memcache.set("Objects_%d" % int(obj_id), [obj])
 			if int(user_id) == obj.author_id:
 				pass
 			else:
 				username = user.username
-				new_note(obj.author_id, 
-						"NA| |%s| <a href='/user/%s'>%s</a> edited the public tags on <a href='/obj/%s'>%s</a>" % (
+				new_note(obj.author_id,
+						"NA| |%s| <a href='/user/%s'>%s</a> upravil verejne stitky <a href='/obj/%s'>%s</a>" % (
 						str(time.time()),
 											str(user_id),
 												str(cgi.escape(username)),
 																					str(obj_id),
 																						str(cgi.escape(obj.title))),
 						)
-			#taskqueue.add(url ='/tagupdateworker', 
+			#taskqueue.add(url ='/tagupdateworker',
 			#			  countdown = 6
 			#			 )
 		eliminated_tags = []
@@ -2982,14 +3027,14 @@ class ObjectImgUpload(ObjectUploadHandler):
 			obj_id = int(obj_id)
 		obj = return_thing_by_id(obj_id, "Objects")
 		if obj is None:
-			logging.error("Object not found")
+			logging.error("Objekt nenalezen")
 			self.error(400)
 			return
 
 		rights = self.request.get("rights")
 		logging.warning(rights)
 		if rights != "yes":
-			self.redirect("/obj/%d?file_upload_error=%s" % (obj_id, "Eek, I think you missed the checkbox for uploading photos. You must agree to the terms when uploading photos.")) 
+			self.redirect("/obj/%d?file_upload_error=%s" % (obj_id, u"Musite souhlasit s podmínkami použiti a zaškrtnout checkbox."))
 			return
 
 
@@ -3005,7 +3050,7 @@ class ObjectImgUpload(ObjectUploadHandler):
 			return
 
 		if author_hash != verify_hash:
-			logging.error("Someone is trying to hack user img")
+			logging.error("Nekdo se snazi hackovat uzivatelovy obrazky")
 			self.error(400)
 			return
 
@@ -3035,7 +3080,7 @@ class ObjectImgUpload(ObjectUploadHandler):
 			if filename[-1].lower() not in ['png','jpg','jpeg','bmp']:
 				logging.error('not "image" filetype, redirect')
 				img_upload.delete()
-				self.redirect('/obj/%d?file_upload_error=%s' % (obj_id, "You may only upload an image file of the types: .png, .jpg,.jpeg, .bmp."))
+				self.redirect('/obj/%d?file_upload_error=%s' % (obj_id, "Pouze soubory typu: .png, .jpg,.jpeg, .bmp."))
 				return
 			# size limit
 			global MAX_FILE_SIZE_FOR_OBJECTS
@@ -3043,7 +3088,7 @@ class ObjectImgUpload(ObjectUploadHandler):
 				logging.warning(img_upload)
 				logging.warning(img_upload.size)
 				img_upload.delete()
-				self.redirect("/obj/%d?file_upload_error=%s" % (obj_id, "That image was too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload a smaller version, preferably < 1MB.")) 
+				self.redirect("/obj/%d?file_upload_error=%s" % (obj_id, u"Příliš velký soubor, soubor musí být menší než 5Mb, v opačném případe doporučujeme uložení odkazu na soubor."))
 				return
 
 			logging.warning(img_upload.size)
@@ -3058,7 +3103,7 @@ class ObjectImgUpload(ObjectUploadHandler):
 				resized = images.Image(blob_key=img_upload)
 				resized.horizontal_flip()
 				resized.horizontal_flip()
-				thumbnail = resized.execute_transforms(output_encoding=images.JPEG, 
+				thumbnail = resized.execute_transforms(output_encoding=images.JPEG,
 													 quality = resize_ratio,
 													)
 				# Save Resized Image back to blobstore
@@ -3068,7 +3113,7 @@ class ObjectImgUpload(ObjectUploadHandler):
 					f.write(thumbnail)
 				files.finalize(new_file)
 				logging.warning(new_file)
-				new_key = files.blobstore.get_blob_key(new_file)   
+				new_key = files.blobstore.get_blob_key(new_file)
 				# Remove the original image
 				img_upload.delete()
 				# Reset img_upload variable
@@ -3078,13 +3123,13 @@ class ObjectImgUpload(ObjectUploadHandler):
 				img_blob_key = str(img_upload.key())
 		else:
 			pass
-		
+
 		## If here, the user will be registered:
 
 		if img_upload:
 			the_object = Objects.get_by_id(obj_id)
 			logging.warning('db query ObjectImgUpload')
-	
+
 			if the_object.main_img_link is None:
 				the_object.main_img_link = img_url
 				the_object.main_img_blob_key = img_blob_key
@@ -3118,11 +3163,11 @@ class ObjectImgDelete(Handler):
 	def post(self):
 		user = self.return_user_if_cookie()
 		if user is None:
-			logging.error("No cookie when trying to delete a photo")
+			logging.error("Zadne cookie pri snaze vymazat foto")
 			self.error(400)
 			return
 		obj_id = self.request.get("obj_id")
-	
+
 		logging.warning(obj_id)
 		if obj_id:
 			obj_id = int(obj_id)
@@ -3136,9 +3181,9 @@ class ObjectImgDelete(Handler):
 			return
 		author = return_thing_by_id(obj.author_id, "Users")
 		author_hash = gen_verify_hash(author)
-		verify_hash = self.request.get("verify") 
+		verify_hash = self.request.get("verify")
 		if author_hash != verify_hash:
-			logging.error("Someone appears to be trying to hack the site by deleting a photo they shouldn't be able to")
+			logging.error("Nekdo se snazil vymazat foto, ktere sam nenahral")
 			self.error(400)
 			return
 
@@ -3271,7 +3316,7 @@ class ObjectSpecificImgDelete(Handler):
 		if str(user_id) == str(author_id):
 			user_is_author = True
 			allowed_to_delete = True
-		
+
 		photo_id = self.request.get("photo_id")
 		if not photo_id:
 			print "\nNo photo id\n"
@@ -3293,7 +3338,7 @@ class ObjectSpecificImgDelete(Handler):
 			return
 
 		# allowed to delete, now time to delete
-		
+
 		# check if visitor photo
 		quad_to_delete = None
 		count = 0
@@ -3340,7 +3385,7 @@ class ObjectSpecificImgDelete(Handler):
 				if str(obj_ref) == str(obj_id):
 					user.imgs_on_others_objects.remove(obj_ref)
 					#print "\nRemoving:", obj_ref
-			
+
 			#print "\n", user.imgs_on_others_objects
 			#print ""
 			user.put()
@@ -3366,7 +3411,7 @@ class ObjectAltFile(Handler):
 			self.redirect('/obj/%d' % obj_id)
 			return
 		if user.key().id() != obj.author_id:
-			logging.warning('user %d is attempting to edit object %d' %(user.key().id(), obj_id))
+			logging.warning('uzivatel %d se snazi upravit objekt %d' %(user.key().id(), obj_id))
 			self.redirect('/obj/%d' % obj_id)
 			return
 
@@ -3380,7 +3425,7 @@ class ObjectAltFile(Handler):
 
 		user_hash = gen_verify_hash(user)
 
-		self.render('altfile.html', 
+		self.render('altfile.html',
 					file_upload_url = file_upload_url,
 					user = user,
 					obj = obj,
@@ -3497,7 +3542,7 @@ class ObjectAltFile(Handler):
 			blob = obj.file_blob_key_15
 			blob.delete()
 			obj.file_link_15 = None
-			obj.file_blob_filename_15 = None			
+			obj.file_blob_filename_15 = None
 		memcache.set("Objects_%d" % obj_id, [obj])
 		obj.put()
 		self.redirect("/altfile/%d" % obj_id)
@@ -3519,7 +3564,7 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 			trusted_user = True
 
 		verify_hash = self.request.get("verify")
-		user_hash = "This string is not valid but not None"
+		user_hash = "Neplatny retezec"
 		if user:
 			user_hash = gen_verify_hash(user)
 		logging.warning(verify_hash)
@@ -3531,7 +3576,7 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 			return
 
 		if user_hash != verify_hash:
-			logging.error("Someone is trying to hack user img")
+			logging.error("Nekdo se snazi hackovat uzivateluv obrazek")
 			self.error(400)
 			return
 
@@ -3550,15 +3595,15 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 			if not main_file_var:
 
 				self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (
-				obj_id, 
-				"It appears you have not submitted a file for upload."
+				obj_id,
+				u"Vypadá to, že jste nepotvrdil soubor ke stažení"
 				)) # this should return to an error version of the upload page
 			else:
 				self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (
-				obj_id, 
-				"You must confirm your agreement with the license and terms."
+				obj_id,
+				"Musite potvrdit podminky pouziti."
 				)) # this should return to an error version of the upload page
-			return				
+			return
 
 		# Success
 		# try:
@@ -3584,7 +3629,7 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 						logging.warning(file_data)
 						logging.warning(file_data.size)
 						file_data.delete()
-						self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, "Unfortunately, this file is too large. We have a maximum file size of 5mb. Hosting large files is prohibitively expensive for us, if you need to host a larger file, please link to it instead.")) # this should return to an error version of the upload page
+						self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, u"Příliš velký soubor. Limit je 5mb. Doporučujeme vytvořit odkaz.")) # this should return to an error version of the upload page
 						return
 
 				file_url = '/serve_obj/%s' % file_data.key()
@@ -3596,14 +3641,14 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 				if filename[-1].lower() not in ALLOWED_ALTERNATE_FILE_EXTENTIONS:
 					logging.warning('disallowed filetype, redirect')
 					file_data.delete()
-					self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, "That file was not an allowed filetype.")) # this should return to an error version of the upload page
+					self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, u"Nepovolený typ souboru.")) # this should return to an error version of the upload page
 					return
 				if not trusted_user: # trusted users can upload binaries
 					if filename[-1].lower() == "stl" and not is_ascii_stl(file_data):
 						logging.warning('stl does not parse, redirect')
 						file_data.delete()
-						self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, "That file did not seem to be a proper ascii .stl or it may be corrupt. If the problem persists, and you believe this is an acceptable ascii .stl file, please contact us.")) # this should return to an error version of the upload page
-						return				
+						self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, "Soubor bohužel není spravný ascii .stl nebo je poškozený.")) # this should return to an error version of the upload page
+						return
 
 
 				### this section should parse the file type
@@ -3613,7 +3658,7 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 				#	self.redirect("/altfileupload?redirect=filetype&file_type_error=%s" % "This file must be a ascii stereo lithography filetype (.stl). We had a problem parsing your file. It may be binary, or not actually an ascii stl filetype.") # this should return to an error version of the upload page
 				#	return
 			else:
-				self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, "Your file upload appears to have failed. Please try again. If the problem persists please contact us.")) # this should return to an error version of the upload page
+				self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (obj_id, "Uloženi souboru se nezdařilo.")) # this should return to an error version of the upload page
 				return
 
 
@@ -3623,7 +3668,7 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 					self.error(400)
 					return
 				logging.warning('db query ObjectAltFileUpload')
-		
+
 				if the_object.file_link_2 is None:
 					the_object.file_link_2 = file_url
 					the_object.file_blob_key_2 = file_blob_key
@@ -3683,12 +3728,12 @@ class ObjectAltFileUpload(ObjectUploadHandler):
 				elif the_object.file_link_15 is None:
 					the_object.file_link_15 = file_url
 					the_object.file_blob_key_15 = file_blob_key
-					the_object.file_blob_filename_15 = str(file_data.filename)										
+					the_object.file_blob_filename_15 = str(file_data.filename)
 				else:
 					logging.warning("No available image slots")
 					self.redirect("/altfile/%d?redirect=filetype&file_type_error=%s" % (
-						obj_id, 
-						"There are too many files uploaded already. You must delete some."
+						obj_id,
+						u"Příliš mnoho uložených souboru, musíte některý vymazat."
 						)) # this should return to an error version of the upload page
 					return
 				the_object.put()
@@ -3726,13 +3771,13 @@ class VisitorImgUpload(ObjectUploadHandler):
 			obj_id = int(obj_id)
 		obj = return_thing_by_id(obj_id, "Objects")
 		if obj is None:
-			logging.error("Object not found")
+			logging.error("Objekt nenalezen")
 			self.error(400)
 			return
 
 		verify_hash = self.request.get("verify")
 		visitor = return_thing_by_id(user_id, "Users")
-		visitor_hash = "This string is not valid but not None"
+		visitor_hash = u"Neplatný řetězec"
 		if visitor:
 			visitor_hash = gen_verify_hash(visitor)
 		logging.warning(verify_hash)
@@ -3744,7 +3789,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 			return
 
 		if visitor_hash != verify_hash:
-			logging.error("Someone is trying to hack user img")
+			logging.error("Nekdo se snazi kackovat uzivateluv obrazek")
 			self.error(400)
 			return
 
@@ -3772,7 +3817,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 			if filename[-1].lower() not in ['png','jpg','jpeg','bmp']:
 				logging.error('not "image" filetype, redirect')
 				img_upload.delete()
-				self.redirect('/obj/%d?file_upload_error=%s' % (obj_id, "You may only upload an image file of the types: .png, .jpg,.jpeg, .bmp."))
+				self.redirect('/obj/%d?file_upload_error=%s' % (obj_id, "Pouze soubory typu: .png, .jpg,.jpeg, .bmp."))
 				return
 
 			# size limit
@@ -3781,7 +3826,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 				logging.warning(img_upload)
 				logging.warning(img_upload.size)
 				img_upload.delete()
-				self.redirect("/obj/%d?file_upload_error=%s" % (obj_id, "That image was too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload a smaller version, preferably < 1MB.")) 
+				self.redirect("/obj/%d?file_upload_error=%s" % (obj_id, u"Příliš velký soubor, maximální velikost  je 5Mb."))
 				return
 
 			logging.warning(img_upload.size)
@@ -3796,7 +3841,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 				resized = images.Image(blob_key=img_upload)
 				resized.horizontal_flip()
 				resized.horizontal_flip()
-				thumbnail = resized.execute_transforms(output_encoding=images.JPEG, 
+				thumbnail = resized.execute_transforms(output_encoding=images.JPEG,
 													 quality = resize_ratio,
 													)
 				# Save Resized Image back to blobstore
@@ -3806,7 +3851,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 					f.write(thumbnail)
 				files.finalize(new_file)
 				logging.warning(new_file)
-				new_key = files.blobstore.get_blob_key(new_file)   
+				new_key = files.blobstore.get_blob_key(new_file)
 				# Remove the original image
 				img_upload.delete()
 				# Reset img_upload variable
@@ -3816,13 +3861,13 @@ class VisitorImgUpload(ObjectUploadHandler):
 				img_blob_key = str(img_upload.key())
 		else:
 			pass
-		
+
 		## If here, the user will be registered:
 
 		if img_upload:
 			the_object = Objects.get_by_id(obj_id)
 			logging.warning('db query ObjectImgUpload')
-	
+
 			visitor_has_already_submitted_img = False
 			counter = 0
 			for a_tuple in the_object.visitor_img_list:
@@ -3835,7 +3880,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 						break
 					else:
 						counter += 1
-				else: 
+				else:
 					# list is None
 					break
 			logging.warning(visitor_has_already_submitted_img)
@@ -3885,7 +3930,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 
 										key_name = "blob|%s" % str(img_upload.key())
 										)
-											
+
 			new_object_photo.put()
 			memcache.set("objectblob|%s" % str(new_object_photo.blob_key), new_object_photo)
 		else:
@@ -3897,7 +3942,7 @@ class VisitorImgUpload(ObjectUploadHandler):
 				user.imgs_on_others_objects.remove("None")
 			user.imgs_on_others_objects.append(str(obj_id))
 			user.put()
-			logging.warning("Successfully created visitor img")
+			logging.warning("Navstevnicky obrazek uspesne vytvoren")
 			memcache.set("Objects_%s" % str(obj_id), [the_object])
 			memcache.set("Users_%s" % str(user_id), [user])
 		self.redirect('/obj/%d' % obj_id)
@@ -3919,11 +3964,11 @@ class ObjectJSON(Handler):
 		global page_url
 		obj_url = page_url + "/obj/%d" % obj_id
 		author_url = page_url + "/user/%d" % obj.author_id
-		
+
 		obj_author = obj.author_name
 		if obj.original_creator:
 			obj_author = obj.original_creator
-		
+
 		thumbnail_urls = []
 		if obj.main_img_link:
 			thumbnail_urls.append(page_url + obj.main_img_link)
@@ -3946,12 +3991,12 @@ class ObjectJSON(Handler):
 		obj_file_url = ""
 		if obj.stl_file_link:
 			obj_file_url = page_url + obj.stl_file_link
-		
+
 		# write logic here for other mimetypes
 		mimetype = ""
 		if obj.stl_filename:
 			mimetype = "application/sla"
-		
+
 		json_obj = {
 			"uuid":obj.uuid,
 			"title":obj.title,
@@ -3986,7 +4031,7 @@ class ObjDelPage(Handler):
 	def render_page(self, obj_num, error=""):
 
 		# should add a hash to this page to better protect the form
-		
+
 		obj_id = int(obj_num)
 		the_obj = object_page_cache(obj_id)
 		the_comments = obj_comment_cache(obj_id)
@@ -4031,8 +4076,8 @@ class ObjDelPage(Handler):
 		total_ratings = the_obj.total_ratings
 		file2 = the_obj.other_file1_link
 		img2 = the_obj.other_img1_link
-		
-		self.render('deleteobjectpage.html', 
+
+		self.render('deleteobjectpage.html',
 					obj_id = obj_id,
 					the_comments = the_comments,
 					error = error,
@@ -4064,7 +4109,7 @@ class ObjDelPage(Handler):
 		obj_id = int(obj_num)
 		self.render_page(obj_num=obj_id)
 
-	
+
 	def post(self, obj_num):
 		obj_id = int(obj_num)
 		the_obj = object_page_cache(obj_id)
@@ -4128,7 +4173,7 @@ def delete_obj(obj_id):
 		file_blob_key_2.delete()
 	if file_blob_key_3 is not None:
 		are_blobs = True
-		file_blob_key_3.delete()				
+		file_blob_key_3.delete()
 	if file_blob_key_4 is not None:
 		are_blobs = True
 		file_blob_key_4.delete()
@@ -4197,7 +4242,7 @@ def delete_obj(obj_id):
 		for quad in the_object.visitor_img_list:
 			if quad != "None":
 				quad_list = quad.split("|")
-				
+
 				user_id = str(quad_list[0])
 				username = str(quad_list[1])
 				img_url = str(quad_list[2])
@@ -4282,7 +4327,7 @@ def delete_obj(obj_id):
 
 	the_object.put()
 	logging.warning('Object "Deleted"')
-	
+
 	object_page_cache(obj_id, update=True, delay = 6)
 
 	if kids_bool == True:
@@ -4345,7 +4390,7 @@ class UserPage(Handler):
 			number_of_items_to_fetch = 30
 
 			# this is for using the object list style of page loading, which we are currently using for the index page
-			the_list = the_list[( (page_num -1) * number_of_items_to_fetch) : (page_num * number_of_items_to_fetch)]	
+			the_list = the_list[( (page_num -1) * number_of_items_to_fetch) : (page_num * number_of_items_to_fetch)]
 
 			print the_list
 			if the_list:
@@ -4368,7 +4413,7 @@ class UserPage(Handler):
 			logged_in = None
 			if user_id:
 				user_id = int(user_id)
-				logged_in = "This guy is logged in"
+				logged_in = "Tento uzivatel je prihlasen"
 			else:
 				pass
 			if the_user.key().id() == user_id:
@@ -4390,14 +4435,14 @@ class UserPage(Handler):
 			is_followed = None
 			if user:
 				if str(user.key().id()) in the_user.blocked_by_list:
-					is_blocked = "Nobody likes this guy!"
+					is_blocked = "Tato osoba je blokovana"
 				if str(user.key().id()) in the_user.follower_list:
-					is_followed = "This guy is your friend!"
+					is_followed = "Tato osoba je Vas pritel!"
 					logging.warning(is_followed)
 
 			logging.warning(img)
 
-			self.render('userpage.html', 
+			self.render('userpage.html',
 						error=error,
 						has_cookie = has_cookie,
 						user = user,
@@ -4414,7 +4459,7 @@ class UserPage(Handler):
 						userpage_id = userpage_id,
 						user_is_user = user_is_user,
 						logged_in = logged_in,
-						
+
 						img = img,
 
 						next_page_num = next_page_num,
@@ -4433,12 +4478,12 @@ class SendMessageHandler(Handler):	# This was part of UserPage, but seperated it
 			self.error(400)
 			return
 		userpage_id = int(userpage_id)
-		
+
 		if not message:
 			user_id = self.check_cookie_return_val("user_id")
 			logged_in = None
 			if user_id:
-				logged_in = "Troy and Abed in the Morning!"
+				logged_in = "Zdravim!"
 			the_user = user_page_cache(userpage_id)
 			username_var = the_user.username
 			created_var = the_user.created
@@ -4462,11 +4507,11 @@ class SendMessageHandler(Handler):	# This was part of UserPage, but seperated it
 				# over 18
 				the_list = user_page_obj_com_cache(userpage_id)
 			photo_upload_url = blobstore.create_upload_url('/user_page_img_upload')
-			error = "Oops, it appears you've sent an empty message"
-			self.render('userpage.html', 
+			error = "Prazdna zprava"
+			self.render('userpage.html',
 						error=error,
-						username=username_var, 
-						created=created_var, 
+						username=username_var,
+						created=created_var,
 						the_list = the_list,
 						user_id = user_id,
 						userpage_id = userpage_id,
@@ -4488,7 +4533,7 @@ class SendMessageHandler(Handler):	# This was part of UserPage, but seperated it
 
 			if str(recipient.key().id()) in sender.blocked_by_list:
 				# user is blocked
-				logging.warning('blockee attempting to message blocker')
+				logging.warning('blokovano')
 				# fake the 6 second sleep
 				time.sleep(6)
 				self.redirect("/user/%d" % recipient.key().id())
@@ -4503,7 +4548,7 @@ class SendMessageHandler(Handler):	# This was part of UserPage, but seperated it
 									)
 			new_message.put()
 			logging.warning('new message -- write')
-			taskqueue.add(url ='/newmessageworker', 
+			taskqueue.add(url ='/newmessageworker',
 						  params = {'recipient_id' : recipient.key().id(),
 									'sender_id' : sender_id
 								   },
@@ -4512,7 +4557,7 @@ class SendMessageHandler(Handler):	# This was part of UserPage, but seperated it
 			#user_messages_cache(recipient.key().id(), update=True, delay = 6)
 			#user_messages_cache(sender_id, update=True)
 			new_note(recipient.key().id(),
-					"Messages|%d|%s| <a href='/user/%s'>%s</a> has sent you a <a href='/user/messages/%s'>message</a>" % (
+					"Messages|%d|%s| <a href='/user/%s'>%s</a> Vam poslal <a href='/user/messages/%s'>zpravu</a>" % (
 							int(new_message.key().id()),
 								str(time.time()),
 													str(sender_id),
@@ -4551,9 +4596,9 @@ class UserPrintshelf(Handler):
 				if the_user.to_print_list[0] == "None":
 					pass
 				else:
-					to_print_list_exists = "One object?!?!"
+					to_print_list_exists = "Jeden objekt?!?!"
 			else:
-				to_print_list_exists = "Hey, this guy right here has hopes and dreams!"
+				to_print_list_exists = "Tento uzivatel ma nadeje a sny!"
 		logging.info("to print list")
 		logging.info(to_print_list_exists)
 		if len(the_user.has_printed_list) > 0:
@@ -4561,9 +4606,9 @@ class UserPrintshelf(Handler):
 				if the_user.has_printed_list[0] == "None":
 					pass
 				else:
-					has_printed_list_exists = "Printed one object. Hell, yea!"
-			else:			
-				has_printed_list_exists = "I print, therefore, I am."
+					has_printed_list_exists = "Vytisknut jeden objekt!"
+			else:
+				has_printed_list_exists = "Tisknu, tedy jsem."
 		to_print_obj_list = []
 		if to_print_list_exists:
 			for i in the_user.to_print_list:
@@ -4601,7 +4646,7 @@ class UserMessagePage(Handler):
 			visitor_id = int(visitor_id)
 		else:
 			self.redirect('/user/%d' % userpage_id)
-			return			
+			return
 		user = self.return_user_if_cookie()
 		if userpage_id != visitor_id:
 			logging.warning(userpage_id + " , " + visitor_id)
@@ -4612,10 +4657,10 @@ class UserMessagePage(Handler):
 			are_messages = None
 			if message_list:
 				if len(message_list) > 0:
-					are_messages = "Look at this douchebag ---- Hey, we get it, you're soooo popular!"
+					are_messages = "Jste velmi popularni!"
 				for message in message_list:
 					if str(message.author_id) in the_user.block_list:
-						message.text = "You have blocked this user's content."
+						message.text = "Zablokoval jste obsah tohoto uzivatele."
 			self.render("usermessages.html",
 						are_messages = are_messages,
 						the_user = the_user,
@@ -4637,7 +4682,7 @@ class UserNotePage(Handler):
 			return
 		elif user.key().id() != user_id:
 			self.redirect('/user/%d' % user_id)
-			return			
+			return
 		else:
 			has_new_note = None
 			notelist = []
@@ -4656,7 +4701,7 @@ class UserNotePage(Handler):
 			else:
 				notelist = user.note_list_all
 			formatted_list = []
-			# pure note format is: 					"db type 			| id 		|epoch_at_creation	| <html></html> " 
+			# pure note format is: 					"db type 			| id 		|epoch_at_creation	| <html></html> "
 			# formatted list will be of this type 	[time_since_creation, note html, note contents, 	the type 		]
 			if notelist is not None:
 				for note in notelist:
@@ -4684,7 +4729,7 @@ class UserNotePage(Handler):
 			else:
 				formatted_list = None
 			self.render('usernotes.html',
-						user = user, 
+						user = user,
 						user_id = user_id,
 						notelist = formatted_list,
 						has_new_note = has_new_note,
@@ -4704,7 +4749,7 @@ class UserNotePage(Handler):
 			return
 		elif user.key().id() != user_id:
 			self.redirect('/user/%d' % user_id)
-			return			
+			return
 		else:
 			the_type = self.request.get('type')
 			logging.warning(the_type)
@@ -4750,7 +4795,7 @@ class UserNotePage(Handler):
 					if str(parent_comment.author_id) not in user.blocked_by_list:
 						logging.warning('should sleep here')
 						new_note(parent_comment.author_id,
-							"Comments|%d|%s| <a href='/user/%s'>%s</a> has replied to your <a href='/com/%s'>comment</a>" % (
+							"Comments|%d|%s| <a href='/user/%s'>%s</a> odpovedel na Vas <a href='/com/%s'>komentar</a>" % (
 									int(new_subcomment.key().id()),
 										str(time.time()),
 															str(user_id),
@@ -4764,7 +4809,7 @@ class UserNotePage(Handler):
 						logging.warning('no note because blocked')
 				else:
 					# this should never happen if in notification page
-					logging.warning('6 second sleep for new subcomment by same previous comment author')
+					logging.warning('6 sekund pro novy komentar')
 					time.sleep(6)
 
 				if nsfw_bool == True:
@@ -4800,7 +4845,7 @@ class UserNotePage(Handler):
 					user_messages_cache(sender_id, update=True)
 
 					new_note(recipient_id,
-							"Messages|%d|%s| <a href='/user/%s'>%s</a> has sent you a <a href='/user_messages/%s'>message</a>" % (
+							"Messages|%d|%s| <a href='/user/%s'>%s</a> Vam poslal <a href='/user_messages/%s'>zpravu</a>" % (
 									int(new_message.key().id()),
 										str(time.time()),
 															str(sender_id),
@@ -4809,7 +4854,7 @@ class UserNotePage(Handler):
 							)
 				else:
 					# fake the sleep
-					logging.warning('no message because this user has been blocked')					
+					logging.warning('zadna zprava, protoze tento uzivatel byl zablokovan')
 					time.sleep(6)
 			else:
 				self.error(404)
@@ -4818,50 +4863,75 @@ class UserNotePage(Handler):
 class UserEdit(Handler):
 	def render_page(self, user_num, error=""):
 		userpage_id = int(user_num)
+		the_user = user_page_cache(userpage_id)
 
-		#check if user is valid
-		userpage = return_thing_by_id(userpage_id, "Users")
-		user = self.return_user_if_cookie()
-		if not user:
-			self.redirect("/login")
-		if not userpage:
+		if not the_user:
 			self.error(404)
-		if user.key().id() != userpage.key().id():
-			self.redirect("/user/edit/%d" % user.key.id())
-
-		user_id = user.key().id()
-
-		user_hash = gen_verify_hash(user)
-		over18 = user.over18
-		the_list = []
-		if over18:
-			# under 18 or no cookie
-			the_list = user_page_obj_com_cache_kids(userpage_id)
 		else:
-			# over 18
-			the_list = user_page_obj_com_cache(userpage_id)
+			user_hash = hashlib.sha256(the_user.random_string).hexdigest()
+			over18 = self.check_cookie_return_val("over18")
+			the_list = []
+			if over18 != "True":
+				# under 18 or no cookie
+				the_list = user_page_obj_com_cache_kids(userpage_id)
+			else:
+				# over 18
+				the_list = user_page_obj_com_cache(userpage_id)
 
-		email = None
-		emailnote = ""
-		if user.user_email:
-			email = user.user_email
-		elif user.unconfirmed_email:
-			emailnote = "You have not yet confirmed your email address: "
-			email = user.unconfirmed_email
-		else:
-			email = ""
+			user_is_user = False
+			user_id = self.check_cookie_return_val("user_id")
+			logged_in = None
+			if user_id:
+				user_id = int(user_id)
+				logged_in = "Tento uzivatel je prihlasen"
+			else:
+				pass
+			if the_user.key().id() == user_id:
+				# User is object author
+				user_is_user = True
+			else:
+				pass
+			if user_is_user == False:
+				self.redirect('/user/%d' % userpage_id)
 
-		self.render('useredit.html', 
-					user = user,
-					user_id = userpage_id,
-					userpage_id = userpage_id,
+			username_var = the_user.username
+			created_var = the_user.created
+			img = the_user.main_img_link
+			summary = the_user.summary
+			location = the_user.location
+			printer = the_user.printer
+			slicer = the_user.slicer
+			software = the_user.software
+			email = None
+			emailnote = ""
+			if the_user.user_email:
+				email = the_user.user_email
+			elif the_user.unconfirmed_email:
+				emailnote = "Jeste jste nepotvrdil svoji emailovou adresu: "
+				email = the_user.unconfirmed_email
+			else:
+				email = ""
 
-					error = error,
-					the_list = the_list,
-					email = email,
-					emailnote = emailnote,
-					user_hash = user_hash,
-					)
+			self.render('useredit.html',
+						user = the_user,
+						error=error,
+						username=username_var,
+						created=created_var,
+						the_list = the_list,
+						user_id = user_id,
+						userpage_id = userpage_id,
+						user_is_user = user_is_user,
+						logged_in = logged_in,
+						img = img,
+						email = email,
+						emailnote = emailnote,
+						summary = summary,
+						location = location,
+						printer = printer,
+						slicer = slicer,
+						software = software,
+						user_hash = user_hash,
+						)
 
 	def get(self, user_num):
 		user_id = int(user_num)
@@ -4884,8 +4954,7 @@ class UserEdit(Handler):
 
 		#hopefully this takes care of it
 		infinite_var = self.request.get('infinite_scroll')
-		infinite_scroll_form_submitted = self.request.get('infinite_verify')
-
+		infitite_scroll_form_submitted = self.request.get('infinite_verify')
 		email_var = self.request.get('email')
 		summary_var = self.request.get('summary')
 		location_var = self.request.get('location')
@@ -4893,17 +4962,23 @@ class UserEdit(Handler):
 		slicer_var = self.request.get('slicer')
 		software_var = self.request.get('software')
 
-		filament_size = self.request.get('filament_size')
-		filament_brand = self.request.get('filament_brand')
-		print_quality = self.request.get('print_quality')
-		print_speed = self.request.get('print_speed')
+		edit_list = [infitite_scroll_form_submitted, email_var, summary_var, location_var, printer_var, slicer_var, software_var]
+		item_count = 0
+		for item in edit_list:
+			if len(item) > 0:
+				item_count += 1
 
-		# variables = [infinite_var, infinite_scroll_form_submitted, email_var, summary_var, location_var, printer_var, slicer_var, software_var, filament_size, filament_brand, print_quality, print_speed]
-		# for var in variables:
-		# 	if var:
-		# 		print ""
-		# 		print var
-		# 		print ""
+
+		if item_count > 1:
+			logging.error(edit_list)
+			logging.error('user edit page: more than one form submitted')
+			self.error(404)
+			return
+		if item_count == 0:
+			logging.error('something fucked up, empty forms submitted')
+			self.redirect('/user/edit/%d' % user_id)
+			return
+		#logging.warning('well we got this far')
 
 		# Now we know we have one form submission and only one.
 		if (infinite_var and user.no_infinite_scroll) or (not infinite_var and not user.no_infinite_scroll):
@@ -4918,75 +4993,60 @@ class UserEdit(Handler):
 			memcache.set("Users_%s" % str(user_id), [user])
 			user.put()
 
-		elif email_var:
+		if email_var:
 			if emailcheck.isValidEmailAddress(email_var):
-				user.unconfirmed_email = email_var
-				confirmation_email(email_var)
-
-				memcache.set("Users_%d" % user_id, [user])
+				user = Users.get_by_id(user_id)
 				logging.warning('db query -- object edit post descripiton')
+				user.unconfirmed_email = email_var
 				user.put()
-
+				user_page_cache(user_id, update=True, delay = 6)
+				confirmation_email(email_var)
 			else:
 				error = '"' + email_var + '" did not appear to be a valid email address.'
 				self.render_page(user_num = user_num, error = error)
 				return
 
+
 		if summary_var:
-			user.summary = summary_var
-			memcache.set("Users_%d" % user_id, [user])
+			user = Users.get_by_id(user_id)
 			logging.warning('db query -- object edit post descripiton')
+			user.summary = summary_var
 			user.put()
+			user_page_cache(user_id, update=True, delay = 6)
 
 		elif location_var:
+			user = Users.get_by_id(user_id)
+			logging.warning('db query -- object edit post descripiton')
 			user.location = location_var
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
 			user.put()
-			
+			user_page_cache(user_id, update=True, delay = 6)
+
 		elif printer_var:
+			user = Users.get_by_id(user_id)
+			logging.warning('db query -- object edit post descripiton')
 			user.printer = printer_var
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
 			user.put()
-			
+			user_page_cache(user_id, update=True, delay = 6)
+
 		elif slicer_var:
+			user = Users.get_by_id(user_id)
+			logging.warning('db query -- object edit post descripiton')
 			user.slicer = slicer_var
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
 			user.put()
-			
+			user_page_cache(user_id, update=True, delay = 6)
+
 		elif software_var:
+			user = Users.get_by_id(user_id)
+			logging.warning('db query -- object edit post descripiton')
 			user.software = software_var
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
 			user.put()
-			
-		elif filament_size:
-			user.filament_size = filament_size
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
-			user.put()
+			user_page_cache(user_id, update=True, delay = 6)
 
-		elif filament_brand:
-			user.filament_brand = filament_brand
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
-			user.put()
+		else:
+			# something broke
+			logging.warning("ERROR -- in object edit post request")
 
-		elif print_quality:
-			user.print_quality = print_quality
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
-			user.put()
-
-		elif print_speed:
-			user.print_speed = print_speed
-			memcache.set("Users_%d" % user_id, [user])
-			logging.warning('db query -- object edit post descripiton')
-			user.put()
-
-		self.redirect('/user/edit/%d' % user_id)
+		self.redirect('/user/%d' % user_id)
 class UserDelPage(Handler):
 	def render_page(self, user_num):
 		user_id = int(user_num)
@@ -5000,7 +5060,7 @@ class UserDelPage(Handler):
 		user_id = self.check_cookie_return_val("user_id")
 		if user_id:
 			user_id = int(user_id)
-		
+
 		if the_user.key().id() != user_id:
 			# User deleted cookie after loading page
 			self.redirect('/user/%d' % the_user.key().id())
@@ -5028,10 +5088,10 @@ class UserDelPage(Handler):
 			self.error(404)
 			return
 
-		self.render('deleteuserpage.html', 
-					username=username_var, 
+		self.render('deleteuserpage.html',
+					username=username_var,
 					user_hash = user_hash,
-					created=created_var, 
+					created=created_var,
 					the_list = the_list)
 
 	def get(self, user_num):
@@ -5052,7 +5112,7 @@ class UserDelPage(Handler):
 			pass
 
 		delete_var = self.request.get("delete")
-		
+
 		if not delete_var:
 			# Do not delete
 			self.redirect('/user/%d' % user_page_id)
@@ -5080,7 +5140,7 @@ class UserDelPage(Handler):
 			for comment in all_comments:
 				# Step 1: --this was removed when Thing DB was eliminated.
 				# Step 2: delete every aspect of each comment
-				
+
 				comment.text 			= " "
 				comment.author_id		= None
 				comment.author_name		= " "
@@ -5148,18 +5208,18 @@ class UserDelPage(Handler):
 			#comments 				= db.ListProperty(default = None)
 
 			user.net_votes 			= None
-			user.user_email			= None	
-			user.unconfirmed_email	= None	
+			user.user_email			= None
+			user.unconfirmed_email	= None
 
-			user.main_img_link		= None	
+			user.main_img_link		= None
 			user.main_img_filename	= None
 			# user blob ref above
 
 			# not redundant yet
-			user.main_img_blob_key	= None	
+			user.main_img_blob_key	= None
 
 			# finally mark user deleted
-			user.deleted 			= True	
+			user.deleted 			= True
 			user.put()
 			logging.warning('User "Deleted"')
 			memcache.set("Users_%d" % user_id, [user])
@@ -5185,7 +5245,7 @@ class UserPageImgUpload(ObjectUploadHandler):
 		logging.warning(verify_hash)
 		logging.warning(user_hash)
 		if user_hash != verify_hash:
-			logging.error("Someone is trying to hack user img")
+			logging.error("Nekdo se snazi kackovat uzivateluv obrazek")
 			self.error(400)
 			return
 
@@ -5252,7 +5312,7 @@ class UserPageImgUpload(ObjectUploadHandler):
 				resized = images.Image(blob_key=img_upload)
 				resized.horizontal_flip()
 				resized.horizontal_flip()
-				thumbnail = resized.execute_transforms(output_encoding=images.JPEG, 
+				thumbnail = resized.execute_transforms(output_encoding=images.JPEG,
 													 quality = resize_ratio,
 													)
 				# Save Resized Image back to blobstore
@@ -5262,7 +5322,7 @@ class UserPageImgUpload(ObjectUploadHandler):
 					f.write(thumbnail)
 				files.finalize(new_file)
 				logging.warning(new_file)
-				new_key = files.blobstore.get_blob_key(new_file)   
+				new_key = files.blobstore.get_blob_key(new_file)
 				# Remove the original image
 				img_upload.delete()
 				# Reset img_upload variable
@@ -5289,7 +5349,7 @@ class UserPageImgUpload(ObjectUploadHandler):
 			the_user.main_img_link = img_url
 			the_user.main_img_blobkey = img_upload.key()
 			the_user.main_img_filename = str(img_upload.filename)
-	
+
 		memcache.set("Users_%d" % int(user_id), [the_user])
 		the_user.put()
 		self.redirect('/user/%d' % user_id)
@@ -5325,7 +5385,7 @@ class CommentPage(Handler):
 			user_id = int(user_id)
 		else:
 			pass
-			
+
 		if user_id and (com.author_id == user_id):
 			# User is object author
 			user_is_author = True
@@ -5408,7 +5468,7 @@ class NewObjectPageDragDrop(Handler):
 		food = None
 
 		file_type_error = ""
-		
+
 		# redirect variables
 		redirect = self.request.get("redirect")
 		if redirect == "True":
@@ -5423,7 +5483,7 @@ class NewObjectPageDragDrop(Handler):
 			rights = self.request.get("rights")
 			audience_var = self.request.get("audience")
 			food_related = self.request.get("food")
-			
+
 			logging.warning(license_var)
 			if license_var == "cc_pd":
 				need_license = ""
@@ -5450,7 +5510,7 @@ class NewObjectPageDragDrop(Handler):
 				need_license = ""
 				not_author = "not_author"
 			else:
-				need_license = "You must select a license."
+				need_license = "Musíte vybrat licenci."
 
 			if audience_var == "sfw":
 				kids = None
@@ -5467,13 +5527,13 @@ class NewObjectPageDragDrop(Handler):
 			creator_license = self.request.get("creator_license")
 			creator_license = strip_string_whitespace(creator_license)
 			if not creator_license:
-				need_license = "You must enter the object's license."
+				need_license = u"Musíte vložit licenci"
 			elif creator_license in ["cc_a", "cc_a_sa", "cc_a_nc", "cc_a_sa_nc", "cc_lgpl", "bsd"]:
 				if error_2:
 					need_license = error_2
 
 
-		
+
 		over18 = self.check_cookie_return_val("over18")
 		if over18 == "True":
 			over18 = True
@@ -5508,13 +5568,13 @@ class NewObjectPageDragDrop(Handler):
 
 	def get(self):
 		self.render_page()
-#####Drag Drop Upload Page End######		
+#####Drag Drop Upload Page End######
 #####Drag Drop Upload Handler Begin#####
 class NewObjectUploadDragDrop(ObjectUploadHandler):
 	#Local Variables
 	MIN_FILE_SIZE = 1  # bytes
 	IMAGE_TYPES = re.compile('image/(gif|p?jpeg|(x-)?png)')
-	STL_TYPE = 'application/octet-stream' or 'application/sla' or 'application/vnd.ms-pki.stl' 
+	STL_TYPE = 'application/octet-stream' or 'application/sla' or 'application/vnd.ms-pki.stl'
 	THUMBNAIL_MODIFICATOR = '=s80'  # max width / height
 
 	#This was in the original source. Not sure if it's necessary
@@ -5534,19 +5594,19 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 			file['error'] = 'File is too small'
 		if file['size'] > MAX_FILE_SIZE_FOR_OBJECTS:
 			file['error'] = 'File is too big'
-		if IMAGE_TYPES.match(file['type']):   
-			pass    
+		if IMAGE_TYPES.match(file['type']):
+			pass
 		elif STL_TYPE == (file['type']):
-			pass    
+			pass
 		else:
-			file['error'] = 'Filetype not allowed'
+			file['error'] = u'Nepovolený typ souboru.'
 		return True
-	#Returns upload file size 
+	#Returns upload file size
 	def get_file_size(self, file):
 		file.seek(0, 2)  # Seek to the end of the file
 		size = file.tell()  # Get the position of EOF
 		file.seek(0)  # Reset the file position to the beginning
-		return size	
+		return size
 
 	#This function for writing blobs with the Files API is deprecated.
 	def write_blob(self, data, info):
@@ -5582,7 +5642,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 	#     s = json.dumps({key: True}, separators=(',', ':'))
 	#     if 'application/json' in self.request.headers.get('Accept'):
 	#         self.response.headers['Content-Type'] = 'application/json'
-	#     self.response.write(s)        
+	#     self.response.write(s)
 
 	def post(self):
 		user_var = self.check_cookie_return_val("user_id")
@@ -5613,12 +5673,11 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 				logging.warning(tag_list)
 				tag_list = strip_list_whitespace(tag_list)
 				logging.warning(tag_list)
-				tag_list = remove_unsafe_chars_from_tags(tag_list)
 				tag_list.sort()
 				if not tag_list:
 					tag_list = ["None"]
 					logging.warning("public tag list set to None")
-				the_tags = tag_list	
+				the_tags = tag_list
 			# if description_var:
 			# 	# Now escape, and save as markdown text
 			# 	escaped_description_text = cgi.escape(description_var)
@@ -5634,7 +5693,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 			# 		#new_object.author_tags.append(tag)
 			# else:
 			# 	pass
-			### Thong: Change this? ###									
+			### Thong: Change this? ###
 			main_file_var = self.request.get("file")
 			logging.warning(main_file_var)
 			###
@@ -5645,13 +5704,13 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 				food_related = True
 			else:
 				food_related = False
-			
+
 			# Kids and NSFW entries (if available)
 			# Here, defaults are okay-for-kids/sfw, because no entry if kids online:
 			okay_for_kids_var = True
 			nsfw_var = False
 			audience_var = self.request.get("audience")
-			if audience_var: 
+			if audience_var:
 				if audience_var == "kids":
 					pass
 				elif audience_var == "sfw":
@@ -5663,7 +5722,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 					logging.warning("New Object -- nsfw parser not working properly")
 			else:
 				pass
-			
+
 			if not (title_var and license_var and rights): #main_file_var and main_img_var and license_var):
 				# Unsuccessful
 				error_1 = ""
@@ -5671,13 +5730,13 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 				error_3 = ""
 				file_error = ""
 				if not title_var:
-					error_1 = "You must include a title."
+					error_1 = u"Vložte název."
 				if not license_var:
-					error_2 = "You must select a license."
+					error_2 = u"Musíte vybrat licenci."
 				if not rights:
-					error_3 = "It must be legal for you to share this model."
+					error_3 = u"Model musíte sdílet legálně."
 				if not main_file_var:
-					file_error = "Hmm, it looks like you forgot to select a file to upload."
+					file_error = u"Vypadá to, že jste zapomněl vybrat soubor k uložení."
 				self.redirect("/newobject?redirect=True&error_1=%s&error_2=%s&error_3=%s&file_error=%s&title=%s&license=%s&rights=%s&audience=%s&food=%s" % (error_1, error_2, error_3, file_error, title_var, license_var, rights, audience_var, str(food_related)))
 			else:
 				if license_var == "not_author":
@@ -5687,13 +5746,13 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 							creator = self.request.get("creator")
 							creator = strip_string_whitespace(creator)
 							if not creator:
-								error_2 = "That license requires you to give attribution."
+								error_2 = u"Tato licence vyžaduje svolení."
 								self.redirect("/newobject?redirect=True&error_2=%s&title=%s&license=%s&rights=%s&audience=%s&food=%s&creator_license=%s" % (error_2, title_var, license_var, rights, audience_var, str(food_related), sublicense))
 								return
 						else:
 							creator = None
 					else:
-						error_2 = "You must select the author's license."
+						error_2 = u"Musíte vybrat autorskou licenci."
 						self.redirect("/newobject?redirect=True&error_2=%s&title=%s&license=%s&rights=%s&audience=%s&food=%s&creator_license=%s" % (error_2, title_var, license_var, rights, audience_var, str(food_related), sublicense))
 						return
 
@@ -5728,7 +5787,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 					# Image data
 					img_upload = None
 					img_blob_key = None
-					img_url = None						
+					img_url = None
 
 					# this is a problem:
 					# if only one file is uploaded, it will default to img...
@@ -5768,7 +5827,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 							blob_key = file_data.key()
 							blob_keys.append(blob_key)
 							# Thong: the following 3 lines are Matt's.  The variables are for the put request for data in the Datastore in the put request below.
-							if (STL_TYPE == (result['type'])):	
+							if (STL_TYPE == (result['type'])):
 								try:
 									file_url = '/serve_obj/%s' % file_data.key()
 									file_blob_key = file_data.key()
@@ -5778,14 +5837,14 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 										secure_url=self.request.host_url.startswith(
 											'https'
 										)
-									)										
+									)
 								except:
 									pass
 							if (IMAGE_TYPES.match(result['type'])):
 								try:
 									img_url = '/serve_obj/%s' % file_data.key()
 									img_blob_key = file_data.key()
-									filename = file_data.filename	
+									filename = file_data.filename
 									result['url'] = images.get_serving_url(
 										blob_key,
 										secure_url=self.request.host_url.startswith(
@@ -5793,13 +5852,13 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 										)
 									)
 									result['thumbnailUrl'] = result['url'] +\
-										THUMBNAIL_MODIFICATOR									
+										THUMBNAIL_MODIFICATOR
 								except:
-									pass					
+									pass
 
 							result['deleteType'] = 'DELETE'
 							result['deleteUrl'] = self.request.host_url +\
-								'/?key=' + urllib.quote(blob_key, '')      
+								'/?key=' + urllib.quote(blob_key, '')
 							if not 'url' in result:
 								result['url'] = self.request.host_url +\
 									'/' + blob_key + '/' + urllib.quote(
@@ -5808,7 +5867,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 					deferred.defer(
 						blob_keys
 					)
-					return results						
+					return results
 						# Thong: We no longer need this validation since we have a new validation function
 						# size limit
 						# global MAX_FILE_SIZE_FOR_OBJECTS
@@ -5819,7 +5878,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 						# 		logging.warning(file_data)
 						# 		logging.warning(file_data.size)
 						# 		file_data.delete()
-						# 		self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "This file is too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload your file to an alternative host and link to it instead.") 
+						# 		self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "This file is too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload your file to an alternative host and link to it instead.")
 						# 		return
 
 						# file_url = '/serve_obj/%s' % file_data.key()
@@ -5844,10 +5903,10 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 						# 		file_data.delete()
 						# 		self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "This file must be a ASCII stereo lithography filetype (.stl). We had a problem parsing your file. It may be a binary .stl, which we do not currently support (if you open the file in a text editor an it is only numbers, this is the problem). However, it may be corrupt, contain questionable content, or not actually be an ascii .stl filetype.") # this should return to an error version of the upload page
 						# 		return
-							
+
 
 						### future parser to rewrite would go here, but this is diminished and will be removed in the future
-						
+
 						# if 1 != 1:
 						# 	parsed_stl = 'put parsed stl here'
 
@@ -5858,7 +5917,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 						# 		f.write(parsed_stl)
 						# 	files.finalize(new_file)
 						# 	logging.warning(new_file)
-						# 	new_key = files.blobstore.get_blob_key(new_file)   
+						# 	new_key = files.blobstore.get_blob_key(new_file)
 						# 	# Remove the original file
 						# 	file_data.delete()
 						# 	# Reset file_data variable
@@ -5871,7 +5930,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 					# 	self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "Your file upload appears to have failed. Please try again. If the problem persists please contact us at bld3r.com@gmail.com.") # this should return to an error version of the upload page
 					# 	return
 
-					new_object = Objects(title = title_var, 
+					new_object = Objects(title = title_var,
 										description = description_var,
 										tags = tag_var,
 										author_id = user_id, # Not sure how file uploads will work, so below are default links for an object
@@ -5889,7 +5948,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 
 										main_img_link = img_url,
 										main_img_blob_key = img_upload.key(),
-										main_img_filename = str(img_upload.filename),										
+										main_img_filename = str(img_upload.filename),
 
 										license = license_var,
 										printable = True,
@@ -5912,7 +5971,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 					# 								filename = str(file_data.filename),
 
 					# 								key_name = "blob|%s" % str(file_data.key())
-					# 								) 
+					# 								)
 
 					# 	new_object_data.put()
 					# 	memcache.set("objectblob|%s" % str(new_object_data.blob_key), new_object_data)
@@ -5961,7 +6020,7 @@ class NewObjectUploadDragDrop(ObjectUploadHandler):
 								)
 					# Thong: Now redirects to object page
 					# self.redirect('/newobject2/%d' % new_object.key().id())
-					self.redirect('/obj/%d' % new_object.key().id())					
+					self.redirect('/obj/%d' % new_object.key().id())
 
 				#except:
 				else:
@@ -6027,7 +6086,9 @@ class ObjectCreation(Handler):
 					)
 
 	def post(self):
-		print "\nStart!\n"
+		memcache.flush_all() #nesforge: fuck u
+
+		print u"\nStart!\n"
 		user = self.return_user_if_cookie()
 		if not user:
 			self.redirect("/login")
@@ -6038,26 +6099,67 @@ class ObjectCreation(Handler):
 		over18 = user.over18
 
 		######################################
+
+		#nesforge: a little spike to convert input into unicode
 		title = self.request.get("title_post")
+		title = title and unicode(title)
+
 		license = self.request.get("license_post")
+		license = license and unicode(license)
+
 		sublicense = self.request.get("sublicense_post")
+		sublicense = sublicense and unicode(sublicense)
+
 		is_author = self.request.get("is_author_post")
+		is_author = is_author and unicode(is_author)
+
 		creator = self.request.get("creator_post")
+		creator = creator and unicode(creator)
+
 		rights = self.request.get("rights_post")
+		rights = rights and unicode(rights)
+
 		food_related = self.request.get("food_related_post")
+		food_related = food_related and unicode(food_related)
+
 		audience = self.request.get("audience_post")
+		audience = audience and unicode(audience)
+
 		description = self.request.get("description_post")
+		description = description and unicode(description)
+
 		tags = self.request.get("tags_post")
+		tags = tags and unicode(tags)
 		######################################
 
 		#############################
 		redirect_url_path = "/newobject"
-		query_string = "title=%s&license=%s&sublicense=%s&rights=%s&audience=%s&food_related=%s&description=%s&tags=%s&creator=%s&is_author=%s" % (title, license, sublicense, rights, audience, str(food_related), description, tags, creator, is_author)
+
+		#nesforge: now we need to encode all urls
+		query_string = urllib.urlencode(dict(
+
+			title = title and title.encode('utf-8') or '',
+			license = license and license.encode('utf-8') or '',
+			sublicense=sublicense and sublicense.encode('utf-8') or '',
+			rights = rights and rights.encode('utf-8') or '',
+			audience=audience and audience.encode('utf-8') or '',
+			food_related=food_related,
+			description=description and description.encode("utf-8") or '',
+			tags=tags and tags.encode('utf-8') or '',
+			creator=creator and creator.encode("utf-8") or '',
+			is_author=is_author and is_author.encode('utf-8') or ''
+
+		))
+
+
 		redirect_str = "%s?%s" % (redirect_url_path, query_string)
+
 		#############################
 
 		# Required fields
-		print "Title:", title
+
+
+		print u"Title:", title.encode('utf-8')
 		title = strip_string_whitespace(title)
 
 		print "License:",license, "\n"
@@ -6075,33 +6177,40 @@ class ObjectCreation(Handler):
 			license = None
 
 		# Error check
-		if not (title and (license or (sublicense and creator)) and rights): 
+		if not (title and (license or (sublicense and creator)) and rights):
 			# Unsuccessful
-			error_title = ""
-			error_license = ""
-			error_rights = ""
-			error_attribution = ""
+			error_title = u""
+			error_license = u""
+			error_rights = u""
+			error_attribution = u""
 			if not title:
-				error_title = "You must include a title."
+				error_title = u"Musite vybrat nazev."
 			if not (license or (sublicense and creator)):
 				if not (license or sublicense):
-					error_license = "You must select a license."
+					error_license = u"Musíte vybrat licenci."
 				if sublicense and not creator:
-					error_attribution = "You must give attribution."
+					error_attribution = u"Musíte udělit svolení,"
 			if not rights:
-				error_rights = "It must be legal for you to share this model."
-			error_str = "&error_title=%s&error_license=%s&error_rights=%s&error_attribution=%s" % (error_title, error_license, error_rights, error_attribution)
-						
+				error_rights = u"Model musite sdilet legalne."
+
+			error_str = urllib.urlencode(dict(
+				error_title= error_title and error_title.encode('utf-8') or '',
+				error_license= error_license and error_license.encode('utf-8') or '',
+				error_rights = error_rights and error_rights.encode("utf-8") or '',
+				error_attribution=error_attribution and error_attribution.encode('utf-8') or ''
+			))
+
+
 			self.redirect(redirect_str + error_str)
 			return
 		if sublicense:
 			license = sublicense
-		
+
 		# Kids and NSFW entries (if available)
 		# Here, defaults are okay-for-kids/sfw, because no entry if kids online:
 		okay_for_kids_var = True
 		nsfw_var = False
-		if audience: 
+		if audience:
 			if audience == "kids":
 				pass
 			elif audience == "sfw":
@@ -6111,28 +6220,28 @@ class ObjectCreation(Handler):
 				nsfw_var = True
 			else:
 				logging.warning("New Object -- nsfw parser not working properly")
-		
+
 		if food_related:
 			food_related = True
 		else:
 			food_related = False
-		
+
 
 
 		# description and tags
-		
+
 		the_tags = None
 		tag_str = tags # for url redirect at the end of this method
+
 		if tags:
 			the_tags = tags.split(',')
 			# tag string section
-			tag_list = the_tags
+			tag_list = map(lambda tag: unicode(tag),the_tags)
 			logging.warning(tag_list)
 			tag_list = remove_list_duplicates(tag_list)
 			logging.warning(tag_list)
 			tag_list = strip_list_whitespace(tag_list)
 			logging.warning(tag_list)
-			tag_list = remove_unsafe_chars_from_tags(tag_list)
 			tag_list.sort()
 			if not tag_list:
 				tag_list = ["None"]
@@ -6151,24 +6260,25 @@ class ObjectCreation(Handler):
 		else:
 			markdown = ""
 
+		#nesforge: logging also needs in encoding
 		print "\nObject:"
-		print "Title:", title
-		print "Description:", description
-		print "Tags:", tags
-		print "Is author?", is_author
-		print "License:", license
-		print "Sublicense:", sublicense
-		print "Creator:", creator
-		print "Audience:", audience
+		print "Title:", title and title.encode('utf-8') or ''
+		print "Description:", description and description.encode('utf-8') or ''
+		print "Tags:", map(lambda tag:tag.encode('utf-8'), tags)
+		print "Is author?", is_author.encode('utf-8')
+		print "License:", license and license.encode('utf-8') or ''
+		print "Sublicense:", sublicense and sublicense.encode('utf-8') or ''
+		print "Creator:",creator and creator.encode('utf-8') or ''
+		print "Audience:", audience and audience.encode('utf-8') or ''
 		print "Food related:", food_related
-		print "Rights:", rights
+		print "Rights:", rights and rights.encode('utf-8') or ''
 		print ""
 
 		print "\nDone!\n"
 
 		# end Matt's code
 
-		new_object = Objects(title = title, 
+		new_object = Objects(title = title,
 							author_id = user_id, # Not sure how file uploads will work, so below are default links for an object
 							author_name = author_name,
 							obj_type = 'upload',
@@ -6203,8 +6313,8 @@ class ObjectCreation(Handler):
 		user_page_obj_com_cache(user_id, update=True)
 
 
-
 		self.redirect("/uploadhandler?%s&obj_id=%d" % (query_string, obj_id))
+
 class UploadHandler(Handler):
 	# -*- coding: utf-8 -*-
 	#
@@ -6234,7 +6344,7 @@ class UploadHandler(Handler):
 		if not obj:
 			self.redirect("/newobject")
 			pass
-		
+
 		user = self.return_user_if_cookie()
 		if not user:
 			self.redirect("/login")
@@ -6249,24 +6359,52 @@ class UploadHandler(Handler):
 		url = self.request.url
 		# print "\n", url
 
-		title				= self.request.get("title")
-		description			= self.request.get("description")
-		tags				= self.request.get("tags")
-		license				= self.request.get("license")
-		sublicense			= self.request.get("sublicense")
-		audience			= self.request.get("audience")
-		creator				= self.request.get("creator")
-		food_related		= self.request.get("food_related")
-		rights				= self.request.get("rights")
-		is_author			= self.request.get("is_author")
+		#nesforge: and again unicode fixes
+		title = self.request.get("title")
+		title = title and unicode(title)
+
+		description	= self.request.get("description")
+		description = description and unicode(description)
+
+		tags = self.request.get("tags")
+		tags = tags and unicode(tags)
+
+		license	= self.request.get("license")
+		license = license and unicode(license)
+
+		sublicense	= self.request.get("sublicense")
+		sublicense = sublicense and unicode(sublicense)
+
+		audience = self.request.get("audience")
+		audience = audience and unicode(audience)
+
+		creator	= self.request.get("creator")
+		creator = creator and unicode(creator)
+
+		food_related = self.request.get("food_related")
+		food_related = food_related and unicode(food_related)
+
+		rights	= self.request.get("rights")
+		rights = rights and unicode(rights)
+
+		is_author = self.request.get("is_author")
+		is_author = is_author and unicode(is_author)
 
 		# Errors:
-		error_title			= self.request.get("error_title")
-		error_license		= self.request.get("error_license")
+		error_title	= self.request.get("error_title")
+		error_title = error_title and unicode(error_title)
+
+		error_license = self.request.get("error_license")
+		error_license = error_license and unicode(error_license)
+
 		error_attribution	= self.request.get("error_attribution")
-		error_rights		= self.request.get("error_rights")
+		error_attribution = error_attribution and unicode(error_attribution)
+
+		error_rights = self.request.get("error_rights")
+		error_rights = error_rights and unicode(error_rights)
 
 		error_no_file_uploaded = self.request.get("error_no_file_uploaded")
+		error_no_file_uploaded = error_no_file_uploaded and unicode(error_no_file_uploaded)
 
 		if creator == "None":
 			creator = ""
@@ -6317,8 +6455,6 @@ class UploadHandler(Handler):
 		if obj_image_link_list or obj_file_filename_list:
 			create_obj_img_table = True
 
-		global ACCEPT_FILE_TYPE_LIST
-		accepted_file_extentions = ACCEPT_FILE_TYPE_LIST
 
 		upload = True
 		self.render("jquery-ui.html",
@@ -6337,7 +6473,7 @@ class UploadHandler(Handler):
 					food_related = food_related,
 					creator = creator,
 					is_author = is_author,
-					
+
 					verify_hash = verify_hash,
 
 					create_obj_img_table = create_obj_img_table,
@@ -6350,8 +6486,6 @@ class UploadHandler(Handler):
 					error_rights = error_rights,
 					error_attribution = error_attribution,
 					error_no_file_uploaded = error_no_file_uploaded,
-
-					accepted_file_extentions = accepted_file_extentions,
 					)
 
 	# Step 3: Upload process starts here.
@@ -6392,15 +6526,35 @@ class UploadHandler(Handler):
 		# get all relevant items
 		######################################
 		title = self.request.get("title_post")
+		title = title and unicode(title)
+
 		license = self.request.get("license_post")
+		license = license and unicode(license)
+
 		sublicense = self.request.get("sublicense_post")
+		sublicense = sublicense and unicode(sublicense)
+
 		is_author = self.request.get("is_author_post")
+		is_author = is_author and unicode(is_author)
+
 		creator = self.request.get("creator_post")
+		creator = creator and unicode(creator)
+
 		rights = self.request.get("rights_post")
+		rights = rights and unicode(rights)
+
 		food_related = self.request.get("food_related_post")
+		food_related = food_related and unicode(food_related)
+
 		audience = self.request.get("audience_post")
+		audience = audience and unicode(audience)
+
 		description = self.request.get("description_post")
+		description = description and unicode(description)
+
 		tags = self.request.get("tags_post")
+		tags = tags and unicode(tags)
+
 		######################################
 
 		# previous_title = obj.title
@@ -6426,7 +6580,21 @@ class UploadHandler(Handler):
 		error_rights = ""
 		#############################
 		redirect_url_path = "/uploadhandler"
-		query_string = "title=%s&license=%s&sublicense=%s&rights=%s&audience=%s&food_related=%s&description=%s&tags=%s&creator=%s&is_author=%s" % (title, license, sublicense, rights, audience, str(food_related), description, tags, creator, is_author)
+		query_string = urllib.urlencode(dict(
+
+			title = title and title.encode('utf-8') or '',
+			license = license and license.encode('utf-8') or '',
+			sublicense=sublicense and sublicense.encode('utf-8') or '',
+			rights = rights and rights.encode('utf-8') or '',
+			audience=audience and audience.encode('utf-8') or '',
+			food_related=food_related,
+			description=description and description.encode("utf-8") or '',
+			tags=tags and tags.encode('utf-8') or '',
+			creator=creator and creator.encode("utf-8") or '',
+			is_author=is_author and is_author.encode('utf-8') or ''
+
+		))
+
 		query_string = query_string + "&obj_id=%d" % obj_id
 
 		# query_string_no_save = "title=%s&license=%s&sublicense=%s&rights=%s&audience=%s&food_related=%s&description=%s&tags=%s&creator=%s&is_author=%s" % (previous_title, previous_license, previous_sublicense, rights, previous_audience, str(previous_food_related), previous_description, previous_tags_str, previous_creator, previous_is_author)
@@ -6436,7 +6604,7 @@ class UploadHandler(Handler):
 		# Firstly, and most importantly, redirect without save first if necessary.
 
 		if not rights:
-			error_rights = "Sorry, we could not save your changes because you have not agreed to our terms. Please check the terms box below and click update."
+			error_rights = "Musite potvrdit podminky pouziti"
 			self.redirect("%s?%s&error_rights=%s" % (redirect_url_path, query_string, error_rights))
 			return
 
@@ -6445,13 +6613,13 @@ class UploadHandler(Handler):
 		title = strip_string_whitespace(title)
 		if not title:
 			title = obj.title
-			error_title = "The title entered was invalid, we've replaced it with the previously saved title."
+			error_title = ""
 			error_with_save = True
 
 		# Next errors with licenses.
 		if is_author:
 			if not license:
-				error_license = "We recieved no license selection, so we've replaced the selection with the previously saved license."
+				error_license = "Nevybrali jste zadnou licenci, proto jsem pouzili posledni ulozenou"
 				if obj.original_creator:
 					sublicense = return_license_short_form_from_full(obj.license)
 					creator = obj.original_creator
@@ -6477,7 +6645,7 @@ class UploadHandler(Handler):
 			# print "here!!!"
 			# print ''
 			if not sublicense:
-				error_license = "We recieved no license selection, so we've replaced the selection with the previously saved license."
+				error_license = "Nevybrali jste zadnou licenci, proto jsem pouzili posledni ulozenou"
 				if obj.original_creator:
 					sublicense = return_license_short_form_from_full(obj.license)
 					creator = obj.original_creator
@@ -6515,14 +6683,39 @@ class UploadHandler(Handler):
 						full_license = None
 						full_sublicense = None
 						is_author = "is_author"
-					error_attribution = "It appears the required attribution section was blank. So, we did not save this new license. Please give attribution and click the update button."
+					error_attribution = "Prosim udelte svoleni."
 					error_with_save = True
 
+
 		# All errors established. Reset query string
-		query_string = "title=%s&license=%s&sublicense=%s&rights=%s&audience=%s&food_related=%s&description=%s&tags=%s&creator=%s&is_author=%s" % (title, license, sublicense, rights, audience, str(food_related), description, tags, creator, is_author)
+		#query_string = "title=%s&license=%s&sublicense=%s&rights=%s&audience=%s&food_related=%s&description=%s&tags=%s&creator=%s&is_author=%s" % (title, license, sublicense, rights, audience, str(food_related), description, tags, creator, is_author)
+
+		#nesforge: fixed
+		query_string = urllib.urlencode(dict(
+
+			title = title and title.encode('utf-8') or '',
+			license = license and license.encode('utf-8') or '',
+			sublicense=sublicense and sublicense.encode('utf-8') or '',
+			rights = rights and rights.encode('utf-8') or '',
+			audience=audience and audience.encode('utf-8') or '',
+			food_related=food_related,
+			description=description and description.encode("utf-8") or '',
+			tags=tags and tags.encode('utf-8') or '',
+			creator=creator and creator.encode("utf-8") or '',
+			is_author=is_author and is_author.encode('utf-8') or ''
+
+		))
 		query_string = query_string + "&obj_id=%d" % obj_id
 		# Set error string
-		error_string = "error_title=%s&error_license=%s&error_attribution=%s" %(error_title, error_license, error_attribution)
+
+		#error_string = "error_title=%s&error_license=%s&error_attribution=%s" %(error_title, error_license, error_attribution)
+
+		#nesforge: fixed
+		error_string = urllib.urlencode(dict(
+			error_title= error_title and error_title.encode('utf-8') or '',
+			error_license= error_license and error_license.encode('utf-8') or '',
+			error_attribution=error_attribution and error_attribution.encode('utf-8') or ''
+		))
 
 		# Now to save everything
 		do_save = False
@@ -6531,9 +6724,7 @@ class UploadHandler(Handler):
 			obj.title = title
 			do_save = True
 
-		# Someone complained about no new line stuff here, so i got ride of the remove whitespace
-
-		# description = strip_string_whitespace(description)
+		description = strip_string_whitespace(description)
 		if description != obj.description:
 			obj.description = description
 			# Now escape, and save as markdown text
@@ -6574,7 +6765,7 @@ class UploadHandler(Handler):
 		# Here, defaults are okay-for-kids/sfw, because no entry if kids online:
 		okay_for_kids_var = True
 		nsfw_var = False
-		if audience: 
+		if audience:
 			if audience == "kids":
 				pass
 			elif audience == "sfw":
@@ -6582,7 +6773,7 @@ class UploadHandler(Handler):
 			elif audience == "nsfw":
 				okay_for_kids_var = False
 				nsfw_var = True
-			
+
 		if okay_for_kids_var != obj.okay_for_kids:
 			obj.okay_for_kids = okay_for_kids_var
 			do_save = True
@@ -6611,7 +6802,7 @@ class UploadHandler(Handler):
 			# print a_file
 			# print ""
 			the_key = a_file['deleteUrl'].split('key=')[1]
-			
+
 			blob_key = the_key
 			# print "Blob key:", the_key, "\n"
 			file_name = a_file['name']
@@ -6619,7 +6810,6 @@ class UploadHandler(Handler):
 			file_url = a_file['url']
 			# print "File url:", file_url, "\n"
 			data_list.append([blob_key, file_name, file_url])
-			print type(a_file)
 
 		s = json.dumps(result, separators=(',', ':'))
 		redirect = self.request.get('redirect')
@@ -6650,7 +6840,6 @@ class UploadHandler(Handler):
 			file_extention = file_name.split(".")[-1]
 			# print file_extention
 			global IMAGE_EXTENTION_LIST
-			global FILE_EXTENTION_LIST
 			if file_extention.lower() in IMAGE_EXTENTION_LIST:
 				if '_ah' in file_url:
 					# print "saving image file"
@@ -6685,15 +6874,15 @@ class UploadHandler(Handler):
 					logging.error("too many images")
 					blobstore.delete(blob_key)
 
-			elif file_extention.lower() in FILE_EXTENTION_LIST:
-				for extention in FILE_EXTENTION_LIST:
-					if ('.' + extention) in file_url:
-						file_url = file_url.split("/")
-						# print "file url split:", file_url
-						file_url = "/serve_obj/%s" % file_url[-2]
-						# print ""
-						# print "saving", file_url
-						# print ""
+			elif file_extention.lower() == "stl":
+				if '.stl' in file_url:
+
+					file_url = file_url.split("/")
+					# print "file url split:", file_url
+					file_url = "/serve_obj/%s" % file_url[-2]
+					# print ""
+					# print "saving", file_url
+					# print ""
 				if not obj.stl_file_blob_key:
 					obj.stl_file_link 			= file_url
 					obj.stl_file_blob_key 		= blob_key
@@ -6880,10 +7069,10 @@ class UploadHandler(Handler):
 						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "nsfw", update=True)
 				else:
 					for path in only_object_types_included:
-						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "sfw", update=True)				
+						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "sfw", update=True)
 				if obj.okay_for_kids == True:
 					for path in only_object_types_included:
-						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "kids", update=True)				
+						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "kids", update=True)
 
 			elif obj.obj_type in ["learn", "ask"]:
 				if obj.nsfw == True:
@@ -6894,7 +7083,7 @@ class UploadHandler(Handler):
 						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "sfw", update=True)
 				if obj.okay_for_kids == True:
 					for path in only_university_types_included:
-						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "kids", update=True)				
+						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "kids", update=True)
 
 			elif obj.obj_type == "news":
 				if obj.nsfw == True:
@@ -6905,7 +7094,7 @@ class UploadHandler(Handler):
 						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "sfw", update=True)
 				if obj.okay_for_kids == True:
 					for path in only_news_types_included:
-						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "kids", update=True)				
+						load_front_pages_from_memcache_else_query(path, NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT, "kids", update=True)
 
 		if object_will_appear_in_queries_now:
 			if user:
@@ -6989,7 +7178,7 @@ class UploadHandler(Handler):
 						'/' + blob_key + '/' + urllib.quote(
 							result['name'].encode('utf-8'), '')
 			results.append(result)
-		
+
 
 		# Deferred deletion should be removed.
 		# deferred.defer(
@@ -7015,16 +7204,16 @@ class UploadHandler(Handler):
 		if ACCEPT_FILE_TYPES.match(file['type']):
 			# if all image files are full
 			if obj.main_img_blob_key and obj.img_blob_key_2 and obj.img_blob_key_3 and obj.img_blob_key_4 and obj.img_blob_key_5:
-				file['error'] = 'Too many images: limit is 5'
+				file['error'] = 'Prilis mnoho obrazku, limit je 5'
 			else:
 				pass
 		elif str(file['type']) in STL_TYPE_LIST:
 			if obj.stl_file_blob_key and obj.file_blob_key_2 and obj.file_blob_key_3 and obj.file_blob_key_4 and obj.file_blob_key_5 and obj.file_blob_key_6 and obj.file_blob_key_7 and obj.file_blob_key_8 and obj.file_blob_key_9 and obj.file_blob_key_10 and obj.file_blob_key_11 and obj.file_blob_key_12 and obj.file_blob_key_13 and obj.file_blob_key_14 and obj.file_blob_key_15:
-				file['error'] = 'Too many data files: limit is 15'
+				file['error'] = 'Prilis mnoho souboru, limit je 15.'
 			else:
 				pass
 		else:
-			file['error'] = 'Filetype not allowed'
+			file['error'] = 'Nepovoleny typ souboru.'
 		return True
 
 	# 3rd method call in handle_upload
@@ -7089,7 +7278,7 @@ class NewObjectPage(Handler):
 		food = None
 
 		file_type_error = ""
-		
+
 		# redirect variables
 		redirect = self.request.get("redirect")
 		if redirect == "True":
@@ -7102,7 +7291,7 @@ class NewObjectPage(Handler):
 			rights = self.request.get("rights")
 			audience_var = self.request.get("audience")
 			food_related = self.request.get("food")
-			
+
 			logging.warning(license_var)
 			if license_var == "cc_pd":
 				need_license = ""
@@ -7129,7 +7318,7 @@ class NewObjectPage(Handler):
 				need_license = ""
 				not_author = "not_author"
 			else:
-				need_license = "You must select a license."
+				need_license = "Musíte vybrat licenci."
 
 			if audience_var == "sfw":
 				kids = None
@@ -7152,7 +7341,7 @@ class NewObjectPage(Handler):
 					need_license = error_2
 
 
-		
+
 		over18 = self.check_cookie_return_val("over18")
 		if over18 == "True":
 			over18 = True
@@ -7162,7 +7351,7 @@ class NewObjectPage(Handler):
 		if not (user_id or author_name):
 			self.redirect("/")
 		else:
-			self.render("newobject1.html", 
+			self.render("newobject1.html",
 						upload_url=upload_url,
 						photo_upload_url = photo_upload_url,
 						over18 = over18,
@@ -7213,13 +7402,13 @@ class NewObjectUpload1(ObjectUploadHandler):
 				food_related = True
 			else:
 				food_related = False
-			
+
 			# Kids and NSFW entries (if available)
 			# Here, defaults are okay-for-kids/sfw, because no entry if kids online:
 			okay_for_kids_var = True
 			nsfw_var = False
 			audience_var = self.request.get("audience")
-			if audience_var: 
+			if audience_var:
 				if audience_var == "kids":
 					pass
 				elif audience_var == "sfw":
@@ -7231,7 +7420,7 @@ class NewObjectUpload1(ObjectUploadHandler):
 					logging.warning("New Object -- nsfw parser not working properly")
 			else:
 				pass
-			
+
 			if not (title_var and license_var and rights and main_file_var): #main_file_var and main_img_var and license_var):
 				# Unsuccessful
 				error_1 = ""
@@ -7241,11 +7430,11 @@ class NewObjectUpload1(ObjectUploadHandler):
 				if not title_var:
 					error_1 = "You must include a title."
 				if not license_var:
-					error_2 = "You must select a license."
+					error_2 = "Musíte vybrat licenci."
 				if not rights:
-					error_3 = "It must be legal for you to share this model."
+					error_3 = "Model musite sdilet legalne."
 				if not main_file_var:
-					file_error = "Hmm, it looks like you forgot to select a file to upload."
+					file_error = "Vypada to, ze jste zapomnel vybrat soubor k ulozeni."
 				self.redirect("/newobject?redirect=True&error_1=%s&error_2=%s&error_3=%s&file_error=%s&title=%s&license=%s&rights=%s&audience=%s&food=%s" % (error_1, error_2, error_3, file_error, title_var, license_var, rights, audience_var, str(food_related)))
 			else:
 				if license_var == "not_author":
@@ -7255,13 +7444,13 @@ class NewObjectUpload1(ObjectUploadHandler):
 							creator = self.request.get("creator")
 							creator = strip_string_whitespace(creator)
 							if not creator:
-								error_2 = "That license requires you to give attribution."
+								error_2 = "Tato licence vyzaduje svoleni."
 								self.redirect("/newobject?redirect=True&error_2=%s&title=%s&license=%s&rights=%s&audience=%s&food=%s&creator_license=%s" % (error_2, title_var, license_var, rights, audience_var, str(food_related), sublicense))
 								return
 						else:
 							creator = None
 					else:
-						error_2 = "You must select the author's license."
+						error_2 = "Musite vybrat autorskou licenci."
 						self.redirect("/newobject?redirect=True&error_2=%s&title=%s&license=%s&rights=%s&audience=%s&food=%s&creator_license=%s" % (error_2, title_var, license_var, rights, audience_var, str(food_related), sublicense))
 						return
 
@@ -7308,7 +7497,7 @@ class NewObjectUpload1(ObjectUploadHandler):
 								logging.warning(file_data)
 								logging.warning(file_data.size)
 								file_data.delete()
-								self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "This file is too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload your file to an alternative host and link to it instead.") 
+								self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "Prilis veliky soubor. Maximum je 5mb.")
 								return
 
 						file_url = '/serve_obj/%s' % file_data.key()
@@ -7320,17 +7509,17 @@ class NewObjectUpload1(ObjectUploadHandler):
 						if filename[-1].lower() not in ["stl"]:
 							logging.warning('not "stl" filetype, redirect')
 							file_data.delete()
-							self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "This file must be a stereo lithography filetype (.stl).") # this should return to an error version of the upload page
+							self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "Poze .stl.") # this should return to an error version of the upload page
 							return
 						if not trusted_user: # trusted users can upload binaries
 							if not is_ascii_stl(file_data):
 								logging.warning('not "ascii stl" after parse, redirect')
 								file_data.delete()
-								self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "This file must be a ASCII stereo lithography filetype (.stl). We had a problem parsing your file. It may be a binary .stl, which we do not currently support (if you open the file in a text editor an it is only numbers, this is the problem). However, it may be corrupt, contain questionable content, or not actually be an ascii .stl filetype.") # this should return to an error version of the upload page
+								self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "Mame potize s tmto souborem. Mus to byt ASCII .stl file") # this should return to an error version of the upload page
 								return
 
 						### future parser to rewrite would go here, but this is diminished and will be removed in the future
-						
+
 						# if 1 != 1:
 						# 	parsed_stl = 'put parsed stl here'
 
@@ -7341,7 +7530,7 @@ class NewObjectUpload1(ObjectUploadHandler):
 						# 		f.write(parsed_stl)
 						# 	files.finalize(new_file)
 						# 	logging.warning(new_file)
-						# 	new_key = files.blobstore.get_blob_key(new_file)   
+						# 	new_key = files.blobstore.get_blob_key(new_file)
 						# 	# Remove the original file
 						# 	file_data.delete()
 						# 	# Reset file_data variable
@@ -7351,10 +7540,10 @@ class NewObjectUpload1(ObjectUploadHandler):
 						# 	file_blob_key = str(file_data.key())
 
 					else:
-						self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "Your file upload appears to have failed. Please try again. If the problem persists please contact us.") # this should return to an error version of the upload page
+						self.redirect("/newobject?redirect=filetype&file_type_error=%s" % "Ulozeni tohoto souboru se nezdarilo.") # this should return to an error version of the upload page
 						return
 
-					new_object = Objects(title = title_var, 
+					new_object = Objects(title = title_var,
 										author_id = user_id, # Not sure how file uploads will work, so below are default links for an object
 										author_name = author_name,
 										obj_type = 'upload',
@@ -7389,7 +7578,7 @@ class NewObjectUpload1(ObjectUploadHandler):
 					# 								filename = str(file_data.filename),
 
 					# 								key_name = "blob|%s" % str(file_data.key())
-					# 								) 
+					# 								)
 
 					# 	new_object_data.put()
 					# 	memcache.set("objectblob|%s" % str(new_object_data.blob_key), new_object_data)
@@ -7428,7 +7617,7 @@ class NewObjectUpload1(ObjectUploadHandler):
 						for follower_id in user.follower_list:
 							logging.warning('should sleep here')
 							new_note(int(follower_id),
-								"Objects|%d|%s| <a href='/user/%s'>%s</a> uploaded <a href='/obj/%s'>%s</a>" % (
+								"Objekty|%d|%s| <a href='/user/%s'>%s</a> ulozeny <a href='/obj/%s'>%s</a>" % (
 										int(new_object.key().id()),
 											str(time.time()),
 																str(user.key().id()),
@@ -7444,14 +7633,14 @@ class NewObjectUpload1(ObjectUploadHandler):
 class NewObjectPage2(Handler):
 	def render_page(self, obj_num):
 		obj_id = int(obj_num)
-		user_id = self.check_cookie_return_val("user_id")		
+		user_id = self.check_cookie_return_val("user_id")
 		user = return_thing_by_id(user_id, "Users")
 		if not user:
 			self.error(400)
 			return
 		query_args = self.request.arguments()
 		querystring = None
-		logging.warning(query_args)		
+		logging.warning(query_args)
 		if query_args:
 			redirect = self.request.get('redirect')
 			if redirect == "True":
@@ -7499,14 +7688,14 @@ class NewObjectPage2(Handler):
 			return
 
 		else:
-			self.render("newobject2.html", 
+			self.render("newobject2.html",
 						photo_upload_url = photo_upload_url,
 						over18 = over18,
 						user=user,
 						user_id=user_id,
 
 						title=title_var,
-						obj_id=obj_id, 
+						obj_id=obj_id,
 						error_1 = error_1,
 						error_2 = error_2,
 						rights = rights,
@@ -7533,7 +7722,7 @@ class NewObjectUpload2(ObjectUploadHandler):
 			main_img_var = self.request.get("img")
 			rights = self.request.get("rights")
 			logging.warning(main_img_var)
-			
+
 			if not (rights and main_img_var): #main_file_var and main_img_var and license_var):
 				# Unsuccessful
 				logging.warning(rights)
@@ -7542,14 +7731,14 @@ class NewObjectUpload2(ObjectUploadHandler):
 				error_2 = ""
 				if not rights:
 					logging.warning("yep")
-					error_1 = "It must be legal for you to share this image."
+					error_1 = "Sdileni tohoto obrazku musi byt legalni."
 				if not main_img_var:
 					logging.warning("yep2")
-					error_2 = "Hmm, it looks like you forgot to select a image to upload."
+					error_2 = "Vypada to, ze jste zapomnel vybrat obrazek k ulozeni."
 				self.redirect("/newobject2/%d?redirect=True&error_1=%s&error_2=%s&rights_checked=%s" % (obj_id, error_1, error_2, rights))
 				return
 
-			else: 
+			else:
 				# Success
 
 				# try:
@@ -7560,7 +7749,7 @@ class NewObjectUpload2(ObjectUploadHandler):
 					guess_type = None
 					# this is a problem:
 					# if only one file is uploaded, it will default to img...
-					# hmm... how to fix
+						# hmm... how to fix
 					try:
 						img_upload = self.get_uploads()[0]
 					except:
@@ -7573,15 +7762,15 @@ class NewObjectUpload2(ObjectUploadHandler):
 						filename_full = img_upload.filename
 						filename = filename_full.split('.')
 						logging.warning(filename)
-						
+
 						#blob_info = blobstore.BlobInfo.get(img_upload)
 						#img_size = blob_info.size
 						#logging.warning(img_size)
-						
+
 						if filename[-1].lower() not in ['png','jpg','jpeg','bmp']:
 							logging.error('not "image" filetype, redirect')
 							img_upload.delete()
-							self.redirect("/newobject2/%d?redirect=filetype&file_type_error=%s" % (obj_id, "That file did not appear to be an allowed image filetype.")) # this should return to an error version of the upload page
+							self.redirect("/newobject2/%d?redirect=filetype&file_type_error=%s" % (obj_id, u"Tento typ souboru není povolen")) # this should return to an error version of the upload page
 							return
 
 						global MAX_FILE_SIZE_FOR_OBJECTS
@@ -7589,7 +7778,7 @@ class NewObjectUpload2(ObjectUploadHandler):
 							logging.warning(img_upload)
 							logging.warning(img_upload.size)
 							img_upload.delete()
-							self.redirect("/newobject2/%d?redirect=filetype&file_type_error=%s" % (obj_id, "This image is too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload a smaller version, preferably < 1MB. We are currently working on integrating imgur, but have not completed it.")) 
+							self.redirect("/newobject2/%d?redirect=filetype&file_type_error=%s" % (obj_id, u"Příliš veliký soubor. Maximum je 5Mb."))
 							return
 
 						if img_upload.size > 100000:
@@ -7603,7 +7792,7 @@ class NewObjectUpload2(ObjectUploadHandler):
 							resized = images.Image(blob_key=img_upload)
 							resized.horizontal_flip()
 							resized.horizontal_flip()
-							thumbnail = resized.execute_transforms(output_encoding=images.JPEG, 
+							thumbnail = resized.execute_transforms(output_encoding=images.JPEG,
 																 quality = resize_ratio,
 																)
 							# Save Resized Image back to blobstore
@@ -7613,7 +7802,7 @@ class NewObjectUpload2(ObjectUploadHandler):
 								f.write(thumbnail)
 							files.finalize(new_file)
 							logging.warning(new_file)
-							new_key = files.blobstore.get_blob_key(new_file)   
+							new_key = files.blobstore.get_blob_key(new_file)
 							# Remove the original image
 							img_upload.delete()
 							# Reset img_upload variable
@@ -7646,11 +7835,11 @@ class NewObjectUpload2(ObjectUploadHandler):
 					# 									filename = str(img_upload.filename),
 
 					# 									key_name = "blob|%s" % str(img_upload.key())
-					# 									)			
+					# 									)
 					# 	new_object_photo.put()
 					# else:
 					# 	pass
-					
+
 					object_page_cache(new_object.key().id(),update=True, delay = 6)
 
 					# if img_upload:
@@ -7713,7 +7902,7 @@ class NewObjectPage3(Handler):
 			self.redirect("/")
 			return
 		else:
-			self.render("newobject3.html", 
+			self.render("newobject3.html",
 						user = user,
 						user_id = user_id,
 						the_obj = the_obj,
@@ -7754,7 +7943,6 @@ class NewObjectPage3(Handler):
 				logging.warning(tag_list)
 				tag_list = strip_list_whitespace(tag_list)
 				logging.warning(tag_list)
-				tag_list = remove_unsafe_chars_from_tags(tag_list)
 				tag_list.sort()
 				if not tag_list:
 					tag_list = ["None"]
@@ -7763,7 +7951,7 @@ class NewObjectPage3(Handler):
 			if not (description_var and tag_var):
 				self.redirect('/obj/%d' % obj_id)
 				return
-			
+
 			# else: Success!
 			new_object = Objects.get_by_id(obj_id)
 
@@ -7794,7 +7982,7 @@ class NewObjectPage3(Handler):
 						store_page_cache_nsfw(tag, update=True)
 					else:
 						store_page_cache_sfw(tag, update=True)
-				taskqueue.add(url ='/tagupdateworker', 
+				taskqueue.add(url ='/tagupdateworker',
 							  countdown = 6
 							 )
 
@@ -7815,7 +8003,7 @@ class NewObjectPage3(Handler):
 			self.redirect('/obj/%d' % new_object.key().id())
 class NewLinkPage(Handler):
 	def render_page(self):
-		
+
 		user_id = self.check_cookie_return_val("user_id")
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
@@ -7832,11 +8020,11 @@ class NewLinkPage(Handler):
 			return
 		else:
 			audience = "kids"
-			self.render("newlink.html", 
+			self.render("newlink.html",
 						user = user,
 						user_id = user_id,
 						over18 = over18,
-						audience = audience,	
+						audience = audience,
 						)
 
 	def get(self):
@@ -7847,7 +8035,7 @@ class NewLinkPage(Handler):
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
 		if not (user_var or author_name or over18):
-			error_var = "Sorry, but you need to be logged in to upload an object."
+			error_var = u"Musíte byt přihlášen."
 			self.render("newlink.html", error = error_var)
 		else:
 			# User is signed in.
@@ -7875,7 +8063,7 @@ class NewLinkPage(Handler):
 			nsfw_var = False
 			audience_var = self.request.get("audience")
 			audience_for_redirect = audience_var
-			if audience_var: 
+			if audience_var:
 				if audience_var == "kids":
 					pass
 				elif audience_var == "sfw":
@@ -7893,7 +8081,7 @@ class NewLinkPage(Handler):
 			# Now escape, and save as markdown text
 			escaped_description_text = cgi.escape(description_var)
 			mkd_converted_description = mkd.convert(escaped_description_text)
-			
+
 			tag_var = self.request.get("tags")
 			the_tags = None
 			if tag_var:
@@ -7905,7 +8093,6 @@ class NewLinkPage(Handler):
 				logging.warning(tag_list)
 				tag_list = strip_list_whitespace(tag_list)
 				logging.warning(tag_list)
-				tag_list = remove_unsafe_chars_from_tags(tag_list)
 				tag_list.sort()
 				if not tag_list:
 					tag_list = ["None"]
@@ -7921,32 +8108,32 @@ class NewLinkPage(Handler):
 			deadLinkFound = True
 			if formatted_link_var:
 				deadLinkFound = False
-			
+
 			if not (title_var and link_var):
 				# Unsuccessful
-				error_var = 'You must include a title and a link.'
+				error_var = u'Musíte vložit název a link.'
 				user = return_thing_by_id(user_id, "Users")
-				self.render("newlink.html", 
+				self.render("newlink.html",
 							user = user,
 							over18 = over18,
-							title=title_var, 
-							link=link_var, 
+							title=title_var,
+							link=link_var,
 							description=description_var,
 							tags=tag_var,
 							audience = audience_for_redirect,
 							error = error_var,
 							food_related = food_related,
 							)
-			
+
 			elif deadLinkFound == True:
 				# Unsuccessful
-				error_var = 'We are having trouble verifying the url you submitted.'
+				error_var = u'Bohužel máme potíže s url, kterou jste vložil.'
 				user = return_thing_by_id(user_id, "Users")
-				self.render("newlink.html", 
+				self.render("newlink.html",
 							user = user,
 							over18 = over18,
-							title=title_var, 
-							link=link_var, 
+							title=title_var,
+							link=link_var,
 							description=description_var,
 							tags=tag_var,
 							audience = audience_for_redirect,
@@ -7958,7 +8145,7 @@ class NewLinkPage(Handler):
 				# Success
 				user = return_thing_by_id(user_id, "Users")
 
-				new_object = Objects(title= title_var, 
+				new_object = Objects(title= title_var,
 									author_id= user_id, 			# Not sure how file uploads will work, so below are default links for an object
 									author_name= author_name,
 									epoch = float(time.time()),
@@ -7983,7 +8170,7 @@ class NewLinkPage(Handler):
 						logging.warning('adding tag %s' % tag)
 						new_object.tags.append(tag)
 						new_object.author_tags.append(tag)
-				
+
 				new_object.put()
 				# db set delay:
 				time.sleep(6)
@@ -7996,7 +8183,7 @@ class NewLinkPage(Handler):
 							store_page_cache_nsfw(tag, update=True)
 						else:
 							store_page_cache_sfw(tag, update=True)
-					taskqueue.add(url ='/tagupdateworker', 
+					taskqueue.add(url ='/tagupdateworker',
 								  countdown = 6
 								 )
 
@@ -8029,7 +8216,7 @@ class NewLinkPage(Handler):
 					for follower_id in user.follower_list:
 						logging.warning('should sleep here')
 						new_note(int(follower_id),
-							"Objects|%d|%s| <a href='/user/%s'>%s</a> submitted <a href='/obj/%s'>%s</a>" % (
+							"Objekt|%d|%s| <a href='/user/%s'>%s</a> potvrzen <a href='/obj/%s'>%s</a>" % (
 									int(new_object.key().id()),
 										str(time.time()),
 															str(user.key().id()),
@@ -8045,7 +8232,7 @@ class NewLinkPage2(Handler):
 
 		query_args = self.request.arguments()
 		querystring = None
-		logging.warning(query_args)		
+		logging.warning(query_args)
 		if query_args:
 			redirect = self.request.get('redirect')
 			if redirect == "True":
@@ -8094,13 +8281,13 @@ class NewLinkPage2(Handler):
 			return
 		else:
 			user = return_thing_by_id(user_var, "Users")
-			self.render("newlink2.html", 
+			self.render("newlink2.html",
 						user = user,
 						user_id = user_var,
 						photo_upload_url = photo_upload_url,
-						
+
 						title=title_var,
-						obj_id=obj_id, 
+						obj_id=obj_id,
 						error_1 = error_1,
 						error_2 = error_2,
 						rights = rights,
@@ -8109,7 +8296,7 @@ class NewLinkPage2(Handler):
 	def get(self, obj_num):
 		obj_id = int(obj_num)
 		self.render_page(obj_num=obj_id)
-class NewLinkUpload(ObjectUploadHandler):	
+class NewLinkUpload(ObjectUploadHandler):
 	def post(self, obj_num):
 		obj_id = int(obj_num)
 
@@ -8127,7 +8314,7 @@ class NewLinkUpload(ObjectUploadHandler):
 			# Required fields
 			main_img_var = self.request.get("img")
 			rights = self.request.get("rights")
-			
+
 			if not (rights and main_img_var): #main_file_var and main_img_var and license_var):
 				# Unsuccessful
 				logging.warning(rights)
@@ -8136,14 +8323,14 @@ class NewLinkUpload(ObjectUploadHandler):
 				error_2 = ""
 				if not rights:
 					logging.warning("yep")
-					error_1 = "It must be legal for you to share this image."
+					error_1 = u"Sdílení tohoto obrázku musí být legálni."
 				if not main_img_var:
 					logging.warning("yep2")
-					error_2 = "Hmm, it looks like you forgot to select a image to upload."
-				self.redirect("/newlink2/%d?redirect=True&error_1=%s&error_2=%s&rights_checked=%s" % (obj_id, error_1, error_2, rights))
+					error_2 = u"Vypadá to, že jste zapomněl vybrat obrázek k uloženi."
+				self.redirect("/newlink2/%d?redirect=True&error_1=%s&error_2=%s&rights_checked=%s" % (obj_id, urllib.quote_plus(error_1.encode('utf-8')), urllib.quote_plus(error_2.encode('utf-8')), rights))
 				return
 
-			else: 
+			else:
 				# Success
 
 				# try:
@@ -8175,7 +8362,7 @@ class NewLinkUpload(ObjectUploadHandler):
 							logging.warning(img_upload)
 							logging.warning(img_upload.size)
 							img_upload.delete()
-							self.redirect("/newlink2/%d?redirect=filetype&file_type_error=%s" % (obj_id, "This image is too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload a smaller version, preferably < 1MB. We are currently working on integrating imgur, but have not completed it.")) 
+							self.redirect("/newlink2/%d?redirect=filetype&file_type_error=%s" % (obj_id, "This image is too large. Our maximum file size is 5MB. We're very sorry, but currently, hosting exceptionally large files is prohibitively expensive for us. Please upload a smaller version, preferably < 1MB. We are currently working on integrating imgur, but have not completed it."))
 							return
 
 						if img_upload.size > 100000:
@@ -8189,7 +8376,7 @@ class NewLinkUpload(ObjectUploadHandler):
 							resized = images.Image(blob_key=img_upload)
 							resized.horizontal_flip()
 							resized.horizontal_flip()
-							thumbnail = resized.execute_transforms(output_encoding=images.JPEG, 
+							thumbnail = resized.execute_transforms(output_encoding=images.JPEG,
 																 quality = resize_ratio,
 																)
 							# Save Resized Image back to blobstore
@@ -8199,7 +8386,7 @@ class NewLinkUpload(ObjectUploadHandler):
 								f.write(thumbnail)
 							files.finalize(new_file)
 							logging.warning(new_file)
-							new_key = files.blobstore.get_blob_key(new_file)   
+							new_key = files.blobstore.get_blob_key(new_file)
 							# Remove the original image
 							img_upload.delete()
 							# Reset img_upload variable
@@ -8222,7 +8409,7 @@ class NewLinkUpload(ObjectUploadHandler):
 					# 	new_object_photo = ObjectBlob(blob_type = 'image',
 					# 									priority = 1,
 					# 									obj_id = int(new_object.key().id()),
-					# 									uploader = int(new_object.author_id), 
+					# 									uploader = int(new_object.author_id),
 					# 									blob_key = img_upload.key(),
 					# 									filename = str(img_upload.filename),
 
@@ -8247,7 +8434,7 @@ class NewLinkUpload(ObjectUploadHandler):
 					object_page_cache(new_object.key().id(),update=True)
 					user_page_object_cache(user_id, update=True) # No longer needed really...
 					user_page_obj_com_cache(user_id, update=True)
-					
+
 					# Update all front pages using the load_front_pages_from_memcache_else_query function
 					global NUMBER_OF_PAGES_TO_UPDATE_WHEN_NEW_OBJECT
 					if new_object.nsfw == True:
@@ -8265,7 +8452,7 @@ class NewLinkUpload(ObjectUploadHandler):
 					self.redirect('/upload_failure.html')
 class NewTorPage(Handler):
 	def render_page(self, error="", over18 = False, link="", title="", description="", tags=""):
-		
+
 		user_id = self.check_cookie_return_val("user_id")
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
@@ -8282,11 +8469,11 @@ class NewTorPage(Handler):
 			return
 		else:
 			audience = "kids"
-			self.render("newtor.html", 
+			self.render("newtor.html",
 						user = user,
 						user_id = user_id,
 						over18 = over18,
-						audience = audience,	
+						audience = audience,
 						)
 
 	def get(self):
@@ -8297,7 +8484,7 @@ class NewTorPage(Handler):
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
 		if not (user_var or author_name or over18):
-			error_var = "Sorry, but you need to be logged in to upload an object."
+			error_var = "Musite byt prihlasen."
 			self.render("newtor.html", error = error_var)
 		else:
 			# User is signed in.
@@ -8325,7 +8512,7 @@ class NewTorPage(Handler):
 			nsfw_var = False
 			audience_var = self.request.get("audience")
 			audience_for_redirect = audience_var
-			if audience_var: 
+			if audience_var:
 				if audience_var == "kids":
 					pass
 				elif audience_var == "sfw":
@@ -8352,7 +8539,6 @@ class NewTorPage(Handler):
 				logging.warning(tag_list)
 				tag_list = strip_list_whitespace(tag_list)
 				logging.warning(tag_list)
-				tag_list = remove_unsafe_chars_from_tags(tag_list)
 				tag_list.sort()
 				if not tag_list:
 					tag_list = ["None"]
@@ -8371,31 +8557,31 @@ class NewTorPage(Handler):
 
 			if not (title_var and link_var):
 				# Unsuccessful
-				error_var = 'You must include a title and a link.'
+				error_var = u'Musíte vložit název a link.'
 				user = return_thing_by_id(user_id, "Users")
-				self.render("newtor.html", 
+				self.render("newtor.html",
 							user = user,
 							user_id = user_id,
 							over18 = over18,
-							title=title_var, 
-							link=link_var, 
+							title=title_var,
+							link=link_var,
 							description=description_var,
 							tags=tag_var,
 							audience = audience_for_redirect,
 							error = error_var,
 							food_related = food_related,
 							)
-			
+
 			elif deadLinkFound == True:
 				# Unsuccessful
-				error_var = 'We are having trouble verifying the url you submitted.'
+				error_var = u'Bohužel máme potíže s url, kterou jste vložil.'
 				user = return_thing_by_id(user_id, "Users")
-				self.render("newtor.html", 
+				self.render("newtor.html",
 							user = user,
 							user_id = user_id,
 							over18 = over18,
-							title=title_var, 
-							link=link_var, 
+							title=title_var,
+							link=link_var,
 							description=description_var,
 							tags=tag_var,
 							audience = audience_for_redirect,
@@ -8406,7 +8592,7 @@ class NewTorPage(Handler):
 
 			else: # Success
 				user = return_thing_by_id(user_id, "Users")
-				new_object = Objects(title= title_var, 
+				new_object = Objects(title= title_var,
 									author_id= user_id, 			# Not sure how file uploads will work, so below are default links for an object
 									author_name= author_name,
 									obj_type= 'tor',
@@ -8443,7 +8629,7 @@ class NewTorPage(Handler):
 							store_page_cache_nsfw(tag, update=True)
 						else:
 							store_page_cache_sfw(tag, update=True)
-					taskqueue.add(url ='/tagupdateworker', 
+					taskqueue.add(url ='/tagupdateworker',
 								  countdown = 6
 								 )
 
@@ -8476,7 +8662,7 @@ class NewTorPage(Handler):
 					for follower_id in user.follower_list:
 						logging.warning('should sleep here')
 						new_note(int(follower_id),
-							"Objects|%d|%s| <a href='/user/%s'>%s</a> summitted a torrent for <a href='/obj/%s'>%s</a>." % (
+							"|%d|%s| <a href='/user/%s'>%s</a> potvrdil torrent pro <a href='/obj/%s'>%s</a>." % (
 									int(new_object.key().id()),
 										str(time.time()),
 															str(user.key().id()),
@@ -8493,13 +8679,13 @@ class SignUpPage(Handler):
 		logging.warning(username)
 		next_url = self.request.headers.get('referer', '/')
 		no_search_bar = True
-		self.render("signup.html", 
-					username=username, 
-					password=password, 
-					verify=verify, 
-					email=email, 
-					error=error, 
-					img_file=img_file, 
+		self.render("signup.html",
+					username=username,
+					password=password,
+					verify=verify,
+					email=email,
+					error=error,
+					img_file=img_file,
 					#photo_upload_url=photo_upload_url,
 					next_url = next_url,
 
@@ -8516,11 +8702,11 @@ class SignUpPage(Handler):
 		name_var = self.request.get("username")
 		password_plain = self.request.get("password")
 		verify_var = self.request.get("verify")
-		email_var = self.request.get("email")			
+		email_var = self.request.get("email")
 		over18_var = self.request.get("over18")
 		tos_var = self.request.get("tos")
 		infinite_scroll_input = self.request.get("infinite")
-		
+
 		no_infinite_scroll_var = False
 		if not infinite_scroll_input:
 			no_infinite_scroll_var = True
@@ -8548,72 +8734,66 @@ class SignUpPage(Handler):
 			username_already_exists = True
 
 		logging.warning("User signup hits DB every time here")
-		
+
 		if username_already_exists:
 			# name not unique
-			error_var = "That name is already taken."
+			error_var = u"Toto jméno je již používáno."
 			self.render_page(email=email_var, error=error_var, username="")
 			return
 
 		#must have unique name to proceed
 		if not (name_var and password_plain):
 			# User did not enter both a name and password
-			error_var = "You must fill in a name and password"
+			error_var = u"Musíte vyplnit jméno a heslo"
 			self.render_page(username=name_var, email=email_var, error=error_var)
 			return
 
 		#must have entered both a name and password
 		if not (password_plain == verify_var):
 			# User's password and verified passwords did not match
-			error_var = "Passwords did not match"
+			error_var = u"Heslo v obou polích neni stejne."
 			self.render_page(username=name_var, error=error_var, email = email_var)
 			return
 
 		if (len(password_plain) < 6) or (len(name_var) < 4):
 			if (len(password_plain) < 6) and (len(name_var) < 4):
-				error_var = "Your name and password are too short. Names must be at least 4 characters and passwords must be at least 6 characters."
+				error_var = u"Jméno musí mít minimálně 4 znaky a heslo 6 znaku."
 				self.render_page(error=error_var, email = email_var)
 				return
 			elif (len(name_var) < 4):
-				error_var = "Your name is too short. Names must be at least 4 characters."
+				error_var = u"Jméno musí mít minimálne 4 znaky."
 				self.render_page(error=error_var, email = email_var)
 				return
 			elif (len(password_plain) < 6):
-				error_var = "Your password is too short. Passwords must be at least 6 characters."
+				error_var = "Heslo musi mít minimálně 6 znaků."
 				self.render_page(username=name_var, error=error_var, email = email_var)
 				return
 			else:
-				logging.error('something in the name/password stuff went wrong.')
+				logging.error(u'Něco se pokazilo')
 				self.error(400)
 				return
 
 		#check for unsafe chars
-		global URL_SAFE_CHARS
-		for i in name_var:
-			if i not in URL_SAFE_CHARS:
-				error_var = 'Your name contains disallowed characters. Please only use letters, numbers, "-" and "_".'
-				self.render_page(error=error_var, email = email_var)
-				return
 
 		#password must equal the verified password to proceed
 		email_var = strip_string_whitespace(email_var)
 		if email_var and (not emailcheck.isValidEmailAddress(email_var)):
 			# user entered an email, but it was invalid
-			error_var = "That doesn't seem to be a valid email address"
+			error_var = "Toto se nezda byt emailovou adresou."
 			self.render_page(username=name_var, error=error_var, email = email_var)
 			return
 
 		if not tos_var:
 			# user has not accepted terms
-			error_var = "You must be an adult and accept our terms of service."
+			error_var = u"Musíte být plnoletý pro založení účtu."
 			self.render_page(username=name_var, error=error_var, email = email_var)
 			return
 
 		# Success!
 		## If here, the user will be registered:
 		new_user = Users(username = name_var,
-						username_lower = name_var.lower(), 
-						hashed_password = '%s' % (make_pw_hash(name_var, password_plain)), 
+						username_lower = name_var.lower(),
+						hashed_password = '%s' % (make_pw_hash(name_var, password_plain)),
 						unconfirmed_email= email_var,
 						over18=over18_var,
 						epoch=float(time.time()),
@@ -8642,7 +8822,7 @@ class LoginPage(Handler):
 		next_url = self.request.headers.get('referer', '/')
 		logging.warning(next_url)
 		no_search_bar = True
-		self.render("login.html", 
+		self.render("login.html",
 					next_url = next_url,
 					no_search_bar = no_search_bar,
 					)
@@ -8656,7 +8836,7 @@ class LoginPage(Handler):
 
 		name_var = self.request.get("username")
 		password_var = self.request.get("password")
-		remember_var = self.request.get("remember")	
+		remember_var = self.request.get("remember")
 
 		u = Users.logsin(name_var, password_var)
 
@@ -8667,7 +8847,7 @@ class LoginPage(Handler):
 				self.login(u)
 			self.redirect(next_url)
 		else:
-			error_var = "Invalid login information."
+			error_var = u"Neplatný login."
 			self.render('login.html', error = error_var, next_url = next_url)
 class WelcomePage(Handler):
 	def render_page(self):
@@ -8677,7 +8857,7 @@ class WelcomePage(Handler):
 			user_id = user.key().id()
 		logging.warning('db query on WelcomePage')
 		self.render("welcome.html",
-					 user = user, 
+					 user = user,
 					 user_id = user_id
 					 )
 
@@ -8692,7 +8872,7 @@ class ContactPage(Handler):
 			user_id = user.key().id()
 		logging.warning('db query on ContactPage')
 		self.render("contact.html",
-					 user = user, 
+					 user = user,
 					 user_id = user_id
 					 )
 
@@ -8727,7 +8907,7 @@ class NsfwPage(Handler):
 		user_id = self.check_cookie_return_val("user_id")
 		if active_user and user_id:
 			active_username = active_user
-			has_cookie = "This adult of questionable taste right here has a valid cookie."
+			has_cookie = u"Spravné cookie."
 		else:
 			pass
 
@@ -8736,12 +8916,12 @@ class NsfwPage(Handler):
 
 		# Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
 		self.render("nsfw.html",
-					user=user, 
-					username=active_username, 
+					user=user,
+					username=active_username,
 					user_id = user_id,
-					the_objects=the_objects, 
-					the_users=the_users, 
-					the_comments=the_comments, 
+					the_objects=the_objects,
+					the_users=the_users,
+					the_comments=the_comments,
 					has_cookie=has_cookie,
 					the_dict = the_dict,
 					cursor = cursor,
@@ -8838,7 +9018,7 @@ class RateHandler(Handler):
 		  self.response.set_status(400, 'Bad Request')
 		  return
 		rate = int(rate)
-		one_long_rate_function(int(obj_id), user_id, rate)	
+		one_long_rate_function(int(obj_id), user_id, rate)
 class FlagHandler(Handler):
 	"""Handles js flag requests."""
 
@@ -8882,7 +9062,7 @@ class DeleteCommentHandler(Handler):
 		# regardless of children, these will change
 		com.author_id = None
 		com.author_name = None
-		com.washed = True	
+		com.washed = True
 		if com.has_children == False:
 			com.text = " "
 			com.markdown = " "
@@ -8904,7 +9084,7 @@ class DeleteCommentHandler(Handler):
 		com.put()
 		memcache.set("Comments_%d" % com.key().id(), [com])
 		logging.warning('db put -- comment deleted')
-		
+
 		obj_comments = obj_comment_cache(com.obj_ref_id, update=True, delay = 6)
 		the_object = return_obj_by_id(com.obj_ref_id)
 		the_object.total_num_of_comments = len(obj_comments)
@@ -8950,7 +9130,7 @@ class BlockHandler(Handler):
 
 		if blocked is True:
 			if block:
-				logging.warning('user has already been blocked')
+				logging.warning('Uzivatel byl blokovan')
 				return
 			elif unblock:
 				# blocked_by_list update
@@ -9000,9 +9180,9 @@ class BlockHandler(Handler):
 				blocker.block_list = []
 				blocker.block_list = the_list
 				blocker.put()
-				memcache.set("Users_%d" % int(blocker_id), [blocker])				
+				memcache.set("Users_%d" % int(blocker_id), [blocker])
 			elif unblock:
-				logging.warning('user is not blocked')
+				logging.warning('Uzivatel neni blokovan')
 				return
 			else:
 				self.error(404)
@@ -9066,7 +9246,7 @@ class FollowHandler(Handler):
 			followee.follower_list = the_list
 			logging.warning(followee.follower_list)
 			followee.put()
-			memcache.set("Users_%d" % followee.key().id(), [followee])	
+			memcache.set("Users_%d" % followee.key().id(), [followee])
 
 		else:
 			#this shouldn't happen
@@ -9224,7 +9404,7 @@ class EditCommentHandler(Handler):
 		if submitted_hash != com_author_hash:
 			logging.warning("User is attempting to hack our comment edits")
 			return
-		
+
 		# convert to markdown2
 		escaped_comment_text = cgi.escape(new_text)
 		mkd_converted_comment = mkd.convert(escaped_comment_text)
@@ -9260,15 +9440,15 @@ class UniMain(FrontHandler):
 		# 	has_cookie = "This guy right here has a valid cookie for realz."
 		# else:
 		# 	pass
-		
+
 		# the_dict = cached_vote_data_for_masonry(the_objects, user_id)
 
 
 		# # Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
-		# self.render("uni_front.html", 
-		# 			the_objects=the_objects, 
-					
-		# 			user=user, 
+		# self.render("uni_front.html",
+		# 			the_objects=the_objects,
+
+		# 			user=user,
 		# 			user_id = user_id,
 		# 			has_cookie=has_cookie,
 		# 			over18 = over18,
@@ -9296,7 +9476,7 @@ class UniMainTop(FrontHandler):
 		self.render_front_page("/topuniversity")
 
 	def post(self):
-		pass		
+		pass
 
 class UniMainVideo(FrontHandler):
 	def render_front(self):
@@ -9320,15 +9500,15 @@ class UniMainVideo(FrontHandler):
 		# 	has_cookie = "This guy right here has a valid cookie for realz."
 		# else:
 		# 	pass
-		
+
 		# the_dict = cached_vote_data_for_masonry(the_objects, user_id)
 
 
 		# # Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
-		# self.render("uni_front.html", 
-		# 			the_objects=the_objects, 
-					
-		# 			user=user, 
+		# self.render("uni_front.html",
+		# 			the_objects=the_objects,
+
+		# 			user=user,
 		# 			user_id = user_id,
 		# 			has_cookie=has_cookie,
 		# 			over18 = over18,
@@ -9338,7 +9518,7 @@ class UniMainVideo(FrontHandler):
 		self.render_front_page("/video")
 
 	def post(self):
-		pass		
+		pass
 class NewLessonPage(Handler):
 	def render_page(self, error="", link="", title="", subject="", description="", tags=""):
 		user = self.return_user_if_cookie()
@@ -9352,14 +9532,14 @@ class NewLessonPage(Handler):
 		if not (user_var or author_name or over18):
 			self.redirect("/")
 		else:
-			self.render("newlesson.html", 
+			self.render("newlesson.html",
 						user = user,
 						user_id = user_var,
 						error=error,
 						over18 = over18,
 
 						link = link,
-						title=title, 
+						title=title,
 						subject=subject,
 						description=description,
 						tags=tags)
@@ -9372,7 +9552,7 @@ class NewLessonPage(Handler):
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
 		if not (user_var or author_name or over18):
-			error_var = "Sorry, but you need to be logged in to submit a lesson."
+			error_var = u"Musíte být přihlášen pro vložení lekce."
 			self.render("newlesson.html", error = error_var)
 		else:
 			# User is signed in.
@@ -9393,7 +9573,7 @@ class NewLessonPage(Handler):
 			okay_for_kids_var = True
 			nsfw_var = False
 			audience_var = self.request.get("audience")
-			if audience_var: 
+			if audience_var:
 				if audience_var == "kids":
 					pass
 				elif audience_var == "sfw":
@@ -9420,7 +9600,6 @@ class NewLessonPage(Handler):
 				logging.warning(tag_list)
 				tag_list = strip_list_whitespace(tag_list)
 				logging.warning(tag_list)
-				tag_list = remove_unsafe_chars_from_tags(tag_list)
 				tag_list.sort()
 				if not tag_list:
 					tag_list = ["None"]
@@ -9436,33 +9615,33 @@ class NewLessonPage(Handler):
 			deadLinkFound = True
 			if formatted_link_var:
 				deadLinkFound = False
-				
+
 			if not (title_var and link_var):
 				# Unsuccessful
-				error_var = "Please complete all required information"
-				self.render("newlesson.html", 
-							error=error_var, 
-							title=title_var, 
+				error_var = u"Prosím vyplňte vsechny požadované informace"
+				self.render("newlesson.html",
+							error=error_var,
+							title=title_var,
 							subject=subject_var,
-							link=link_var, 
+							link=link_var,
 							description=description_var,
 							tags=tag_var)
-			
+
 			elif deadLinkFound == True:
 				# Unsuccessful
-				error_var = 'We are having trouble verifying the url you submitted. Please paste in the full url (including the "http://").'
-				self.render("newlesson.html", 
-							error=error_var, 
-							title=title_var, 
+				error_var = u'Bohužel máme potíže s url, které jste vložil. Vložte url s "http://".'
+				self.render("newlesson.html",
+							error=error_var,
+							title=title_var,
 							subject=subject_var,
-							link="", 
+							link="",
 							description=description_var,
 							tags=tag_var)
 
 			else:
 				# Success
 				user = return_thing_by_id(user_id, "Users")
-				new_object = Objects(title= title_var, 
+				new_object = Objects(title= title_var,
 									author_id= user_id, 			# Not sure how file uploads will work, so below are default links for an object
 									author_name= author_name,
 									obj_type= 'learn',
@@ -9502,7 +9681,7 @@ class NewLessonPage(Handler):
 							store_page_cache_nsfw(tag, update=True)
 						else:
 							store_page_cache_sfw(tag, update=True)
-					taskqueue.add(url ='/tagupdateworker', 
+					taskqueue.add(url ='/tagupdateworker',
 								  countdown = 6
 								 )
 
@@ -9557,13 +9736,13 @@ class NewAskPage(Handler):
 		if not (user_var or author_name or over18):
 			self.redirect("/")
 		else:
-			self.render("newask.html", 
+			self.render("newask.html",
 						user = user,
 						user_id = user_var,
 						error=error,
 						over18 = over18,
 
-						title=title, 
+						title=title,
 						text=text,
 						tags=tags)
 
@@ -9575,7 +9754,7 @@ class NewAskPage(Handler):
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
 		if not (user_var or author_name or over18):
-			error_var = "Sorry, but you need to be logged in to ask a question."
+			error_var = u"Pro položení otázky je třeba být přihlášen."
 			self.render("newlesson.html", error = error_var)
 		else:
 			# User is signed in.
@@ -9591,7 +9770,7 @@ class NewAskPage(Handler):
 			okay_for_kids_var = True
 			nsfw_var = False
 			audience_var = self.request.get("audience")
-			if audience_var: 
+			if audience_var:
 				if audience_var == "kids":
 					pass
 				elif audience_var == "sfw":
@@ -9616,7 +9795,6 @@ class NewAskPage(Handler):
 				logging.warning(tag_list)
 				tag_list = strip_list_whitespace(tag_list)
 				logging.warning(tag_list)
-				tag_list = remove_unsafe_chars_from_tags(tag_list)
 				tag_list.sort()
 				if not tag_list:
 					tag_list = ["None"]
@@ -9626,10 +9804,10 @@ class NewAskPage(Handler):
 
 			if not (title_var and full_question_var):
 				# Unsuccessful
-				error_var = "Please complete all required information"
-				self.render("newask.html", 
-							error=error_var, 
-							title=title_var, 
+				error_var = u"Prosím vyplňte všechny požadované informace"
+				self.render("newask.html",
+							error=error_var,
+							title=title_var,
 							text=full_question_var,
 							tags=tag_var)
 				return
@@ -9637,7 +9815,7 @@ class NewAskPage(Handler):
 			else:
 				# Success
 				user = return_thing_by_id(user_id, "Users")
-				new_object = Objects(title= title_var, 
+				new_object = Objects(title= title_var,
 									author_id= user_id, 			# Not sure how file uploads will work, so below are default links for an object
 									author_name= author_name,
 									obj_type= 'ask',
@@ -9672,7 +9850,7 @@ class NewAskPage(Handler):
 							store_page_cache_nsfw(tag, update=True)
 						else:
 							store_page_cache_sfw(tag, update=True)
-					taskqueue.add(url ='/tagupdateworker', 
+					taskqueue.add(url ='/tagupdateworker',
 								  countdown = 6
 								 )
 
@@ -9705,7 +9883,7 @@ class NewAskPage(Handler):
 					for follower_id in user.follower_list:
 						logging.warning('should sleep here')
 						new_note(int(follower_id),
-							"Objects|%d|%s| <a href='/user/%s'>%s</a> summitted a question: <a href='/obj/%s'>%s</a>." % (
+							"Objects|%d|%s| <a href='/user/%s'>%s</a> potvrdil otazku: <a href='/obj/%s'>%s</a>." % (
 									int(new_object.key().id()),
 										str(time.time()),
 															str(user.key().id()),
@@ -9737,15 +9915,15 @@ class NewsPage(FrontHandler):
 		# 	has_cookie = "This guy right here has a valid cookie for realz."
 		# else:
 		# 	pass
-		
+
 		# the_dict = cached_vote_data_for_masonry(the_objects, user_id)
 
 
 		# # Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
-		# self.render("news_front.html", 
-		# 			the_objects=the_objects, 
-					
-		# 			user=user, 
+		# self.render("news_front.html",
+		# 			the_objects=the_objects,
+
+		# 			user=user,
 		# 			user_id = user_id,
 		# 			has_cookie=has_cookie,
 		# 			over18 = over18,
@@ -9773,11 +9951,11 @@ class NewsPageTop(FrontHandler):
 		self.render_front_page("/topnews")
 
 	def post(self):
-		pass		
+		pass
 
 class NewArticlePage(Handler):
 	def render_page(self):
-		
+
 		user_id = self.check_cookie_return_val("user_id")
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
@@ -9794,11 +9972,11 @@ class NewArticlePage(Handler):
 			return
 		else:
 			audience = "kids"
-			self.render("new_article.html", 
+			self.render("new_article.html",
 						user = user,
 						user_id = user_id,
 						over18 = over18,
-						audience = audience,	
+						audience = audience,
 						)
 
 	def get(self):
@@ -9809,7 +9987,7 @@ class NewArticlePage(Handler):
 		author_name = self.check_cookie_return_val("username")
 		over18 = self.check_cookie_return_val("over18")
 		if not (user_var or author_name or over18):
-			error_var = "Sorry, but you need to be logged in to upload an object."
+			error_var = "Musite byt prihlasen."
 			self.render("newlink.html", error = error_var)
 		else:
 			# User is signed in.
@@ -9837,7 +10015,7 @@ class NewArticlePage(Handler):
 			nsfw_var = False
 			audience_var = self.request.get("audience")
 			audience_for_redirect = audience_var
-			if audience_var: 
+			if audience_var:
 				if audience_var == "kids":
 					pass
 				elif audience_var == "sfw":
@@ -9862,7 +10040,6 @@ class NewArticlePage(Handler):
 				logging.warning(tag_list)
 				tag_list = strip_list_whitespace(tag_list)
 				logging.warning(tag_list)
-				tag_list = remove_unsafe_chars_from_tags(tag_list)
 				tag_list.sort()
 				if not tag_list:
 					tag_list = ["None"]
@@ -9879,17 +10056,17 @@ class NewArticlePage(Handler):
 			if formatted_link_var:
 				deadLinkFound = False
 			#logging.warning(deadLinkFound)
-			
+
 			if not (title_var and link_var):
 				# Unsuccessful
-				error_var = 'You must include a title and a link.'
+				error_var = u'Musíte vložit název a link.'
 				user = return_thing_by_id(user_id, "Users")
-				self.render("new_article.html", 
+				self.render("new_article.html",
 							user = user,
 							user_id = user_id,
 							over18 = over18,
-							title=title_var, 
-							link=link_var, 
+							title=title_var,
+							link=link_var,
 							description=description_var,
 							tags=tag_var,
 							audience = audience_for_redirect,
@@ -9897,17 +10074,17 @@ class NewArticlePage(Handler):
 							food_related = food_related,
 							)
 				return
-			
+
 			elif deadLinkFound:
 				# Unsuccessful
-				error_var = 'We are having trouble verifying the url you submitted.'
+				error_var = u'Bohužel máme potíže s url, kterou jste vložil.'
 				user = return_thing_by_id(user_id, "Users")
-				self.render("new_article.html", 
+				self.render("new_article.html",
 							user = user,
 							user_id = user_id,
 							over18 = over18,
-							title=title_var, 
-							link=link_var, 
+							title=title_var,
+							link=link_var,
 							description=description_var,
 							tags=tag_var,
 							audience = audience_for_redirect,
@@ -9920,7 +10097,7 @@ class NewArticlePage(Handler):
 				# Success
 				user = return_thing_by_id(user_id, "Users")
 
-				new_object = Objects(title= title_var, 
+				new_object = Objects(title= title_var,
 									author_id= user_id, 			# Not sure how file uploads will work, so below are default links for an object
 									author_name= author_name,
 									epoch = float(time.time()),
@@ -9945,7 +10122,7 @@ class NewArticlePage(Handler):
 						logging.warning('adding tag %s' % tag)
 						new_object.tags.append(tag)
 						new_object.author_tags.append(tag)
-				
+
 				new_object.put()
 				# db set delay:
 
@@ -9959,7 +10136,7 @@ class NewArticlePage(Handler):
 							store_page_cache_nsfw(tag, update=True)
 						else:
 							store_page_cache_sfw(tag, update=True)
-					taskqueue.add(url ='/tagupdateworker', 
+					taskqueue.add(url ='/tagupdateworker',
 								  countdown = 6
 								 )
 
@@ -10001,17 +10178,17 @@ class NewArticlePage(Handler):
 							)
 
 				#news_front_cache(update=True, delay=0) # delay above
-				self.redirect('/obj/%d' % new_object.key().id())	
+				self.redirect('/obj/%d' % new_object.key().id())
 
 class RepRapTypesPage(Handler):
 	def render_page(self):
 		user = self.return_user_if_cookie()
 
-		self.render("parts.html", 
+		self.render("parts.html",
 					user = user,
 					)
 	def get(self):
-		self.render_page()	
+		self.render_page()
 
 class TagSearchMain(Handler):
 	def render_page(self, error="", tag_searched=""):
@@ -10020,9 +10197,11 @@ class TagSearchMain(Handler):
 		tag_list = return_top_x_tags()
 		#logging.warning(tag_list)
 		tag_searched = self.request.get("tag_searched")
+		tag_searched = tag_searched
+
 		error_type = self.request.get("error")
 		if error_type == "does_not_exist":
-			error = 'It appears the object tag "%s" you were looking for does not exist.' % tag_searched
+			error = u'Vypadá to, že štítek "%s" neexistuje.' % urllib.unquote_plus(tag_searched)
 
 		self.render('tag_search_main.html',
 					user = user,
@@ -10035,24 +10214,14 @@ class TagSearchMain(Handler):
 		self.render_page()
 	def post(self):
 		search_var = self.request.get('search')
-		global URL_SAFE_CHARS
-		dummy_var = ""
-		for i in search_var:
-			if i in URL_SAFE_CHARS:
-				dummy_var += i
-			else:
-				if i == " ":
-					dummy_var += "_"
-				else:
-					pass
-		search_var = dummy_var
 
 		if not search_var:
 			self.redirect('/tag')
 			return
 		else:
-			self.redirect('/tag/%s' % search_var)
+			self.redirect('/tag/%s' % urllib.quote_plus(search_var.encode('utf-8')))
 			return
+
 class TagMainError(Handler):
 	pass
 	# def render_page(self, error="It appears the object tag you were looking for does not exist."):
@@ -10069,9 +10238,11 @@ class TagMainError(Handler):
 	# 	else:
 	# 		logging.warning('win')
 	# 		self.redirect('/tag/%s' % search_var)
-	# 		return	
+	# 		return
 class TagPage(Handler):
 	def render_front(self, search_term):
+
+
 		if search_term == "None":
 			self.redirect("/tag")
 			return
@@ -10085,10 +10256,10 @@ class TagPage(Handler):
 			over18 = True
 			the_list = store_page_cache_sfw(search_term)
 		if len(the_list) == 0:
-			# i should be able to use a query string in the url to throw 
+			# i should be able to use a query string in the url to throw
 			# this back to the tag search page instead of an independent error page
 			error = "does_not_exist"
-			self.redirect('/tag?tag_searched=%s&error=%s' % (search_term, error))
+			self.redirect('/tag?tag_searched=%s&error=%s' % (urllib.quote_plus(search_term.encode('utf-8')), error.encode('utf-8')))
 			return
 
 		the_objects = the_list
@@ -10101,14 +10272,14 @@ class TagPage(Handler):
 				rated_objects.append(obj)
 			else:
 				unrated_objects.append(obj)
-		
+
 		if len(unrated_objects) > 0:
 			unrated_objects.sort(key = lambda x: x.votesum, reverse=True)
 
 		has_rated_objects = None
 		has_rated_and_unrated = None
 		if len(rated_objects) > 0:
-			has_rated_objects = "Well hey, hi, howdy; it look's like we got some rated object here..."
+			has_rated_objects = u"Ohodnocený objekt..."
 			if len(unrated_objects) > 0:
 				has_rated_and_unrated = "Yeppers"
 		else:
@@ -10121,10 +10292,10 @@ class TagPage(Handler):
 		user_id = self.check_cookie_return_val("user_id")
 		if active_user and user_id:
 			active_username = active_user
-			has_cookie = "This guy right here has a valid cookie for realz."
+			has_cookie = u"Tento uživatel má platné cookie."
 		else:
 			pass
-		
+
 		# Tag's wiki entry first 140 chars:
 		wiki_entry = return_current_wiki_page(search_term)
 		wiki_entry_first_lines = None
@@ -10136,12 +10307,12 @@ class TagPage(Handler):
 				stripped_wiki_entry = stripped_wiki_entry.strip()
 				logging.warning(stripped_wiki_entry)
 
-				if len(stripped_wiki_entry) > 140:						
+				if len(stripped_wiki_entry) > 140:
 					wiki_entry_first_lines = stripped_wiki_entry[:141]
 					if wiki_entry_first_lines[-1] == "<":
 						wiki_entry_first_lines = wiki_entry_first_lines[:-1]
 				else:
-					wiki_entry_first_lines = stripped_wiki_entry			
+					wiki_entry_first_lines = stripped_wiki_entry
 
 		#the_dict = vote_data_for_masonry(the_objects, user_id)
 		# trying cached version
@@ -10150,15 +10321,15 @@ class TagPage(Handler):
 		unrated_dict = cached_vote_data_for_masonry(unrated_objects, user_id)
 
 		# Note that front page updates when new users sign up now, that can be removed (from the signup handler) when all users is no longer a parameter here.
-		self.render("tag_search_results.html", 
+		self.render("tag_search_results.html",
 					user = user,
-					username=active_username, 
+					username=active_username,
 					user_id = user_id,
-					the_objects=the_objects, 
+					the_objects=the_objects,
 					has_cookie=has_cookie,
 					over18 = over18,
 					the_dict = the_dict,
-					
+
 					unrated_dict = unrated_dict,
 					rated_dict = rated_dict,
 					search_term = search_term,
@@ -10170,7 +10341,7 @@ class TagPage(Handler):
 					)
 
 	def get(self, search_term):
-		self.render_front(search_term=search_term)
+		self.render_front(search_term=search_term.decode('utf-8'))
 
 	def post(self, search_term):
 		pass
@@ -10208,7 +10379,7 @@ class EmailConfirmationHandler(Handler):
 				user.put()
 				memcache.set("Users_%d" % user_id, [user])
 				new_note(user.key().id(),
-						"NA| |%s|<span style='font-size:20px;'>You have received an award! <br>All your awesome email checking has won you this sweet badge: <img src='/img/email_award.png' height=15px />. <br>Check out all the first class goodness on your <a href='/user/%s'>user page</a></span>"
+						u"NA| |%s|<span style='font-size:20px;'>Obdržel jste oceněni! <br>Vyhrál jste odznak: <img src='/img/email_award.png' height=15px />. <br> <a href='/user/%s'>user page</a></span>"
 							% ( str(time.time()),
 								str(user.key().id())
 								)
@@ -10216,13 +10387,13 @@ class EmailConfirmationHandler(Handler):
 			else:
 				user.put()
 				memcache.set("Users_%d" % user_id, [user])
-			message = "You have successfully confirmed your email!"
+			message = u"Úspešnš jste potvrdil svůj email!"
 			self.render("emailconfirmation.html",
 						message = message,
 						no_email = no_email,
 						)
 		else:
-			message = "Oops, something went wrong, we were unable to confirm your email."
+			message = u"Bohužel se nám nepodařilo potvrdit Váš email."
 			self.render("emailconfirmation.html",
 						message = message,
 						no_email = no_email,
@@ -10267,8 +10438,8 @@ class PasswordResetHandler(Handler):
 				global secret
 
 				info_str = the_user.random_string+secret+time_var
-				
-				# why use email and username here... 
+
+				# why use email and username here...
 				# it would be much better to have a large string generated on user signup
 				# that way the passed hash would be much more secure
 
@@ -10285,20 +10456,16 @@ class PasswordResetHandler(Handler):
 
 				reset_url = page_url+"/password_reset_confirmation/" + reset_hash + "-" + str(the_user.key().id())
 				logging.warning(reset_url)
-				
+
 				email_address = email
 				sender_address = data.password_reset_sender_address()
 				subject = "Reset your password"
-				body = """
-				We have recieved a request to reset your password.
-				If you have forgotten your password,
-				you may reset it by clicking on the link below.
-				This link is valid for around 15 minutes:
+				body = u"""
+				Obdrželi jsem Váš požadovek na resetování hesla
 
 				%s
 
-				If you did not request to reset your password,
-				please contact us immediately.
+
 				""" % reset_url
 				mail.send_mail(sender_address, email_address, subject, body)
 		self.redirect('/password_reset_acknowledgement')
@@ -10361,13 +10528,13 @@ class PasswordResetConfirmationHandler(Handler):
 							 )
 			return
 		if password != verify:
-			error = "The passwords did not match."
+			error = "Heslo nesouhlasi."
 			self.render('password_change.html',
 							 error = error,
 							 )
 			return
 		if len(password) < 6:
-			error = "Your passwords is too short."
+			error = "Prilis kratke heslo."
 			self.render('password_change.html',
 							 error = error,
 							 )
@@ -10379,7 +10546,7 @@ class PasswordResetConfirmationHandler(Handler):
 		user = return_thing_by_id(user_id, "Users")
 		logging.warning(user)
 		if user is None or (user.deleted == True):
-			error = "This user does not appear to exist anymore... or somthing may have gone wrong."
+			error = u"Tento uživatel neexistuje, nebo se něco pokazilo."
 			self.render_page('password_change.html',
 							 error = error,
 							 )
@@ -10409,7 +10576,7 @@ class PasswordResetConfirmationHandler(Handler):
 
 		if user_hash == path_hash or user_hash_plus_one == path_hash:
 			#Success!
-			user.password = '%s' % (make_pw_hash(user.username, password)), 
+			user.password = '%s' % (make_pw_hash(user.username, password)),
 			self.login(user)
 			pass
 		self.redirect('/')
@@ -10426,7 +10593,7 @@ class WikiEntry(db.Model):
 	content 		= db.TextProperty()
 	markdown 		= db.TextProperty()
 	created 		= db.DateTimeProperty(auto_now_add = True)
-	original_epoch 	= db.FloatProperty()	
+	original_epoch 	= db.FloatProperty()
 	author_id 		= db.IntegerProperty()
 	author_name 	= db.StringProperty()
 
@@ -10451,7 +10618,10 @@ class WikiMain(Handler):
 					)
 class WikiPage(Handler):
 	def get(self, url):
-		page_title = url[1:] # this drops the first '/'
+
+		not_enc = url[1:] # this drops the first '/'
+		page_title = urllib.unquote(not_enc).decode('utf8')
+
 		if page_title == '':
 			page_title = 'home'
 		if page_title == 'home':
@@ -10462,7 +10632,7 @@ class WikiPage(Handler):
 			return
 
 		user = self.return_user_if_cookie()
-		user_id = self.check_cookie_return_val("user_id")		
+		user_id = self.check_cookie_return_val("user_id")
 		has_cookie = self.return_has_cookie()
 		logging.warning(user)
 		logging.warning(has_cookie)
@@ -10475,41 +10645,46 @@ class WikiPage(Handler):
 				page = p
 				break
 		if page:
+			print 'Yey'
 			page = return_current_wiki_page(page_title)
 			# all_pages = return_one_wiki_page_history_from_cache(page_title)
-			# if all_pages:
+			# if all_pages:urllib.unquote(
 			# 	#logging.warning('getting page')
 			# 	page = all_pages[0]
 			title = page.title
-			self.render('wiki_page.html', 
+			self.render('wiki_page.html',
 						user = user,
 						user_id = user_id,
 						has_cookie = has_cookie,
-						page = page, 
+						page = page,
 						)
 		else:
 			if has_cookie is None:
 				self.redirect('/w/')
 				return
-			self.redirect('/_edit/' + page_title)
+			print 'upr'
+			self.redirect('/_edit/' + not_enc.decode('utf-8').encode('utf-8'))
+
 class EditPage(Handler):
 	def get(self, url):
-		page_title = url[1:] # this drops the first '/'
+		not_enc = url[1:] # this drops the first '/'
+		page_title = not_enc.decode('utf8')
+
 		if page_title == '' or page_title == 'None':
 			page_title = 'index'
-		
-		next_url = self.request.headers.get('referer', '/w/%s' % str(page_title))
+
+		next_url = self.request.headers.get('referer', '/w/%s' % page_title)
 		logging.warning(next_url)
 
 		user = self.return_user_if_cookie()
-		user_id = self.check_cookie_return_val("user_id")		
+		user_id = self.check_cookie_return_val("user_id")
 		has_cookie = self.return_has_cookie()
 		logging.warning(user)
 		logging.warning(has_cookie)
 		if (user is None) or (has_cookie is None):
 			if "/_edit/" in next_url:
-				next_url = "/w/%s" % str(page_title)
-			self.redirect(next_url)
+				next_url = "/w/%s" % page_title
+			self.redirect(next_page_numurl)
 			return
 		pages = return_all_wiki_pages_from_cache()
 		page = None
@@ -10519,12 +10694,12 @@ class EditPage(Handler):
 				page = p
 				break
 		if page == None:
-			page = WikiEntry(title = page_title, 
-							content = 'Enter the new content in here',
+			page = WikiEntry(title = unicode(page_title),
+							content = 'Sem vlozte novy obsah',
 							user = user,
 							has_cookie = has_cookie,
 							)
-		self.render('wiki_edit.html', 
+		self.render('wiki_edit.html',
 					page = page,
 					user = user,
 					user_id = user_id,
@@ -10532,11 +10707,14 @@ class EditPage(Handler):
 					)
 
 	def post(self, url):
-		title = url[1:] # this drops the first '/'
+
+		not_enc = url[1:] # this drops the first '/'
+		title = not_enc.decode('utf8')
+
 		if title == "":
 			title = 'home'
-		
-		next_url = self.request.headers.get('referer', '/w/%s' % str(title))
+
+		next_url = self.request.headers.get('referer', '/w/%s' % title.encode('utf-8'))
 		logging.warning(next_url)
 
 		user = self.return_user_if_cookie()
@@ -10556,12 +10734,12 @@ class EditPage(Handler):
 		if current_page:
 			if no_whitespace_content == "" or no_whitespace_content == current_page.content:
 				logging.warning("No change to WikiEntry")
-				self.redirect('/w/%s' % str(title))
-				return		 
+				self.redirect('/w/%s' % title.encode('utf-8'))
+				return
 		safe_content = cgi.escape(content)
 		markdown = mkd.convert(safe_content)
 
-		page = WikiEntry(title = title, 
+		page = WikiEntry(title = title,
 						content = content,
 						markdown = markdown,
 						author_id = user_id,
@@ -10576,18 +10754,19 @@ class EditPage(Handler):
 		return_all_wiki_pages_from_cache(update = True)
 		return_one_wiki_page_history_from_cache(title, update = True)
 		return_wiki_history_from_cache(title, update = True, delay = 0)
-		self.redirect('/w/' + title)
+		self.redirect('/w/' + title.encode('utf-8'))
 class HistoryPage(Handler):
 	def get(self, url):
 		page_title = url[1:] # this drops the first '/'
+		page_title = page_title.encode('utf-8')
 		if page_title == '':
 			page_title = 'index'
-		
-		next_url = self.request.headers.get('referer', '/w/%s' % str(page_title))
+
+		next_url = self.request.headers.get('referer', '/w/%s' % page_title.encode('utf-8'))
 		logging.warning(next_url)
 
 		user = self.return_user_if_cookie()
-		user_id = self.check_cookie_return_val("user_id")		
+		user_id = self.check_cookie_return_val("user_id")
 		has_cookie = self.return_has_cookie()
 		logging.warning(user)
 		logging.warning(has_cookie)
@@ -10596,10 +10775,10 @@ class HistoryPage(Handler):
 		for page in pages:
 			page.time_since = time_since_creation(page.epoch)
 		if len(pages) == 0:
-			self.redirect('/_edit/' + page_title)
+			self.redirect('/_edit/' + page_title.encode('utf-8'))
 			return
-		self.render('wiki_history.html', 
-					pages = pages, 
+		self.render('wiki_history.html',
+					pages = pages,
 					title = page_title,
 					user = user,
 					user_id = user_id,
@@ -10607,7 +10786,8 @@ class HistoryPage(Handler):
 					)
 	def post(self, url):
 		page_title = url[1:] # this drops the first '/'
-		
+		page_title = page_title.decode('utf-8')
+
 		user = self.return_user_if_cookie()
 		has_cookie = self.return_has_cookie()
 		logging.warning(user)
@@ -10631,17 +10811,17 @@ class HistoryPage(Handler):
 			old_page.reverter_name = username
 
 			old_page.put()
-			
+
 			return_current_wiki_page(page_title, update = True, delay = 6)
 			return_all_wiki_pages_from_cache(update = True)
 			return_one_wiki_page_history_from_cache(page_title, update = True)
 			return_wiki_history_from_cache(page_title, update = True, delay = 0)
-			self.redirect('/w/' + page_title)
+			self.redirect('/w/' + page_title.encode('utf-8'))
 
 class WikiIndex(Handler):
 	def get(self):
 		user = self.return_user_if_cookie()
-		user_id = self.check_cookie_return_val("user_id")		
+		user_id = self.check_cookie_return_val("user_id")
 		has_cookie = self.return_has_cookie()
 		unfiltered_pages = return_all_wiki_pages_from_cache()
 		unfiltered_pages.sort(key = lambda x: x.created, reverse=True)
@@ -10656,7 +10836,7 @@ class WikiIndex(Handler):
 				pages.append(uf_p)
 			else:
 				pass
-		self.render('wiki_all.html', 
+		self.render('wiki_all.html',
 					pages = pages,
 					user = user,
 					user_id = user_id,
@@ -10664,7 +10844,8 @@ class WikiIndex(Handler):
 					)
 
 def return_current_wiki_page(title, update=False, delay = 0):
-	key = "wiki_entry_%s" % str(title)
+	title = unicode(title)
+	key = u"wiki_entry_%s" % title
 	logging.warning(key)
 	page = memcache.get(key)
 	logging.warning(page)
@@ -10756,7 +10937,7 @@ def one_long_vote_function(obj_id, user_id, newvote):
 		return
 	oldvote = 0 #default
 	# find and oldvote if one exists by iteration (if i can find this faster that'd be good... maybe a lambda function)
-	
+
 	if user_id in obj.voter_list:
 		counter = 0
 		for a_vote in obj.voter_vote:
@@ -10819,7 +11000,7 @@ def one_long_vote_function(obj_id, user_id, newvote):
 	# putting but uncomment changed list if upgrading to temporal puts
 	db.put(obj)
 	reset_front_page_memcache_after_vote(obj)
-	
+
 	#update_objects_changed_list_cache(obj_id)
 	#put_objects_in_changed_list_to_db()
 
@@ -10950,7 +11131,7 @@ def return_rank(obj_or_com):
 		# changing this to use epoch not 'com.created_int'
 		round(
 			float(obj_or_com.votesum)
-			+ float(DAY_SCALE / days_alive) 
+			+ float(DAY_SCALE / days_alive)
 			- decay
 		)
 	)
@@ -10960,7 +11141,7 @@ def new_rank():
 	rank = "%020d" % (
 		# changing this to use epoch not 'com.created_int'
 		float(
-			1 # = obj_or_com.votesum 
+			1 # = obj_or_com.votesum
 			+ float(DAY_SCALE / .01) # initial days_alive is counted as 0.01
 		)
 	)
@@ -10985,7 +11166,7 @@ def one_long_comment_vote_function(com_id, user_id, newvote):
 	logging.warning('got this far')
 	oldvote = 0 #default
 	# find and oldvote if one exists by iteration (if i can find this faster that'd be good... maybe a lambda function)
-	
+
 	if user_id in com.voter_list:
 		counter = 0
 		for a_vote in com.voter_vote:
@@ -11043,7 +11224,7 @@ def one_long_comment_vote_function(com_id, user_id, newvote):
 	com.rank = return_rank(com)
 
 
-	
+
 
 
 	# set the object memcache (object must be a singleton for some reason)
@@ -11060,7 +11241,7 @@ def one_long_comment_vote_function(com_id, user_id, newvote):
 		the_parent = return_com_by_id(com.com_parent)
 		the_parent.ranked_children = sort_comment_child_rank_after_vote(com.com_parent, update=True, delay = 6)
 		memcache.set("Comments_%d" % com.com_parent, [the_parent])
-		#update_comments_changed_list_cache(the_parent.key().id())		
+		#update_comments_changed_list_cache(the_parent.key().id())
 		# putting but uncomment changed list if upgrading to temporal puts
 		the_parent.put()
 
@@ -11089,7 +11270,7 @@ def one_long_rate_function(obj_id, user_id, newrate):
 	if newrate not in [1,2,3,4,5]:
 		return
 	oldrate = 0 #default
-	# find and oldrate if one exists by iteration (if i can find this faster that'd be good... maybe a lambda function)	
+	# find and oldrate if one exists by iteration (if i can find this faster that'd be good... maybe a lambda function)
 	logging.warning(obj.rater_list)
 	logging.warning(user_id)
 	if user_id in obj.rater_list:
@@ -11119,7 +11300,7 @@ def one_long_rate_function(obj_id, user_id, newrate):
 		change[counter] = "%d|%d" % (int(user_id), int(newrate))
 		obj.rater_rate = change
 	else:
-		logging.warning('user %d just rated on %d for the first time' % (int(user_id), int(obj_id)))		
+		logging.warning('user %d just rated on %d for the first time' % (int(user_id), int(obj_id)))
 		obj.rater_list.append(int(user_id))
 		logging.warning(obj.rater_list)
 		if obj.rater_list is None:
@@ -11137,13 +11318,13 @@ def one_long_rate_function(obj_id, user_id, newrate):
 	memcache.set("rate_val_tuple|" + str(user_id) + "|" + str(obj_id), (int(user_id), int(newrate)))
 
 	update_objects_changed_list_cache(obj_id)
-	
+
 	# db.put is optional at this point
 	db.put(obj)
 
 	logging.warning('6 sec sleep')
 	time.sleep(6)
-	
+
 	logging.warning("db.put in rating function")
 	put_objects_in_changed_list_to_db()
 
@@ -11151,7 +11332,7 @@ def one_long_rate_function(obj_id, user_id, newrate):
 	#update_front_style_memcache_after_rate(obj, "front_page_cache_kids")
 	#update_front_style_memcache_after_rate(obj, "front_page_cache_nsfw")
 	#update_object_page_memcache_after_rate(obj, obj_id)
-	
+
 	for tag in obj.tags:
 		if obj.nsfw == False:
 			update_store_style_memcache_after_rate(obj, tag, "store_page_cache_sfw")
@@ -11159,7 +11340,7 @@ def one_long_rate_function(obj_id, user_id, newrate):
 			update_store_style_memcache_after_rate(obj, tag, "store_page_cache_nsfw")
 		if obj.okay_for_kids == True:
 			update_store_style_memcache_after_rate(obj, tag, "store_page_cache_kids")
-	
+
 	# update user reputation
 	user = return_thing_by_id(obj.author_id, "Users")
 	logging.warning(oldrate)
@@ -11199,7 +11380,7 @@ def one_long_flag_function(obj_id, user_id, newflag):
 		return
 	oldflag = 0 #default
 	# find and oldflag if one exists by iteration (if i can find this faster that'd be good... maybe a lambda function)
-	
+
 	if user_id in obj.flagger_list:
 		counter = 0
 		for a_flag in obj.flagger_flag:
@@ -11242,7 +11423,7 @@ def one_long_flag_function(obj_id, user_id, newflag):
 	# set the object memcache (object must be a singleton for some reason)
 	memcache.set("Objects_%d" % int(obj_id), [obj])
 	memcache.set("flag_tuple|" + str(user_id) + "|" + str(obj_id), (int(user_id), int(newflag)))
-	
+
 	update_objects_changed_list_cache(obj_id)
 
 	# db.put is optional at this point
@@ -11283,7 +11464,7 @@ def one_long_comment_flag_function(com_id, user_id, newflag):
 		return
 	oldflag = 0 #default
 	# find and oldflag if one exists by iteration (if i can find this faster that'd be good... maybe a lambda function)
-	
+
 	if user_id in com.flagger_list:
 		counter = 0
 		for a_flag in com.flagger_flag:
@@ -11322,7 +11503,7 @@ def one_long_comment_flag_function(com_id, user_id, newflag):
 
 	# set the object memcache (object must be a singleton for some reason)
 	memcache.set("Comments_%d" % int(com_id), [com])
-	
+
 	update_comments_changed_list_cache(com.key().id())
 
 	# db.put is optional at this point
@@ -11341,9 +11522,9 @@ def one_long_comment_flag_function(com_id, user_id, newflag):
 	memcache.set("%s_%d" % ("Users", com.author_id), [user])
 	user.put()
 
-def cached_vote_data_for_masonry(obj_list, user_id): 
+def cached_vote_data_for_masonry(obj_list, user_id):
 	#, page=0): #previously called 'quote_for_template(q,u,p=0)'
-	"""Convert a Quote object into a suitable dictionary for 
+	"""Convert a Quote object into a suitable dictionary for
 	a template. Does some processing on parameters and adds
 	an index for paging.
 
@@ -11400,7 +11581,7 @@ def cached_vote_data_for_masonry(obj_list, user_id):
 			#'creator': quote.creator,
 			#'created': obj.creation_order[:10],
 			#'created_long': obj.creation_order[:19],
-			#'index':  index        
+			#'index':  index
 		})
 	#index += 1
 	return obj_dict
@@ -11629,7 +11810,7 @@ def update_comments_changed_list_cache(com_id):
 		logging.warning(the_list)
 		cache_list = [the_list]
 		try:
-			memcache.set(key, cache_list)	
+			memcache.set(key, cache_list)
 		except Exception as exception:
 			logging.error("memcache set error")
 			print exception
@@ -11794,7 +11975,7 @@ def update_store_style_memcache_after_rate(changed_obj, tag, cache_key):
 	else:
 		return
 def update_object_page_memcache_after_vote(changed_obj, obj_id):
-	key = "object" + str(obj_id)	
+	key = "object" + str(obj_id)
 	obj_singleton = memcache.get(key)
 	if obj_singleton is None:
 		logging.warning("Two problems may have occured. Either memcache %s is either cold (this is probably the case) or does not exist, or the cache updated does conform with this function." % key)
@@ -11810,7 +11991,7 @@ def update_object_page_memcache_after_vote(changed_obj, obj_id):
 		logging.error("memcache set error")
 		print exception
 def update_object_page_memcache_after_rate(changed_obj, obj_id):
-	key = "object" + str(obj_id)	
+	key = "object" + str(obj_id)
 	obj_singleton = memcache.get(key)
 	if obj_singleton is None:
 		logging.warning("Two problems may have occured. Either memcache %s is either cold (this is probably the case) or does not exist, or the cache updated does conform with this function." % key)
@@ -11827,7 +12008,7 @@ def update_object_page_memcache_after_rate(changed_obj, obj_id):
 		logging.error("memcache set error")
 		print exception
 def update_object_page_memcache_after_flag(changed_obj, obj_id):
-	key = "object" + str(obj_id)	
+	key = "object" + str(obj_id)
 	obj_singleton = memcache.get(key)
 	if obj_singleton is None:
 		logging.warning("Two problems may have occured. Either memcache %s is either cold (this is probably the case) or does not exist, or the cache updated does conform with this function." % key)
@@ -11874,7 +12055,7 @@ def return_user_rate_from_tuple(obj_id, user_id):
 				memcache.set(key, user_rate)
 			except Exception as exception:
 				logging.error("memcache set error")
-				print exception		
+				print exception
 			return user_rate[1]
 
 		else:
@@ -11887,7 +12068,7 @@ def return_user_rate_from_tuple(obj_id, user_id):
 				logging.error("memcache set error")
 				print exception
 			return user_rate[1]
-		
+
 	else:
 		rate = user_rate[1]
 		return rate
@@ -11923,7 +12104,7 @@ def return_user_flag_from_tuple(obj_id, user_id):
 				logging.error("memcache set error")
 				print exception
 			return user_flag[1]
-			
+
 		else:
 			# This user has not flagged before
 			# oldflag set to 0 by default above
@@ -12166,7 +12347,7 @@ def obj_comment_cache(obj_id, update=False, delay = 0):
 			print exception
 	else:
 		print "\n", "\n"
-		print "obj_comment_cache returned cached list of comments for this object" 
+		print "obj_comment_cache returned cached list of comments for this object"
 		print "\n", "\n"
 	return comments_in_cache
 
@@ -12321,7 +12502,7 @@ def user_page_obj_com_cache(author_id, update=False, delay = 0):
 		# 		pass
 		# 	else:
 		# 		com_age = com.epoch
-			
+
 		# 	comment_added = False
 		# 	no_more_objects = False
 
@@ -12347,13 +12528,13 @@ def user_page_obj_com_cache(author_id, update=False, delay = 0):
 		# 				logging.error('ERROR: user_page_obj_com_cache')
 		# 	else:
 		# 		no_more_objects = True
-			
+
 		# 	if comment_added == True:
 		# 		#the_comments.remove(com)
 		# 		pass
 		# 	else:
 		# 		pass
-			
+
 		# 	if no_more_objects == False:
 		# 		pass
 		# 	else:
@@ -12402,7 +12583,7 @@ def user_messages_cache(recipient_id, update=False, delay = 0):
 			time.sleep(int(delay))
 		logging.warning('db query -- user_messages_cache')
 		received = db.GqlQuery('SELECT * FROM Messages WHERE recipient_id = :1 AND deleted = False ORDER BY epoch DESC', recipient_id)
-		received = list(received)		
+		received = list(received)
 		sent = db.GqlQuery('SELECT * FROM Messages WHERE author_id = :1 AND deleted = False ORDER BY epoch DESC', recipient_id)
 		received = list(received)
 		sent = list(sent)
@@ -12588,9 +12769,9 @@ def confirmation_email(email_address):
 	%s
 	""" % confirmation_url
 	mail.send_mail(sender_address, email_address, subject, body)
-def masonry_format_for_userpage(obj_list, user_id): 
+def masonry_format_for_userpage(obj_list, user_id):
 	#, page=0): #previously called 'quote_for_template(q,u,p=0)'
-	"""Convert a Quote object into a suitable dictionary for 
+	"""Convert a Quote object into a suitable dictionary for
 	a template. Does some processing on parameters and adds
 	an index for paging.
 
@@ -12638,7 +12819,7 @@ def masonry_format_for_userpage(obj_list, user_id):
 
 				'flagged_by_user':return_user_flag_from_tuple(this_obj_id, user_id),
 				'time_since': time_since_creation(obj.epoch),
-				'num_comments': num_comments_of_obj(obj.key().id()),      
+				'num_comments': num_comments_of_obj(obj.key().id()),
 			})
 		else:
 			obj_dict.append(obj)
@@ -12729,7 +12910,7 @@ def return_top_x_tags(x_value=50, return_all_tags=False):
 				stripped_wiki_entry = stripped_wiki_entry.strip()
 				logging.warning(stripped_wiki_entry)
 
-				if len(stripped_wiki_entry) > 140:						
+				if len(stripped_wiki_entry) > 140:
 					wiki_entry_first_lines = stripped_wiki_entry[:141]
 					if wiki_entry_first_lines[-1] == "<":
 						wiki_entry_first_lines = wiki_entry_first_lines[:-1]
@@ -12737,6 +12918,7 @@ def return_top_x_tags(x_value=50, return_all_tags=False):
 					wiki_entry_first_lines = stripped_wiki_entry
 		list_with_excerpts.append([i[0], i[1], wiki_entry_first_lines])
 	return list_with_excerpts
+
 def time_since_creation(item_epoch_var):
 	raw_secs = round(time.time())-round(item_epoch_var)
 	#logging.warning(raw_secs)
@@ -12745,31 +12927,31 @@ def time_since_creation(item_epoch_var):
 	if raw_secs < 60:
 		seconds = raw_secs
 		if seconds > 1:
-			time_str = "%d seconds" % seconds
+			time_str = "%d sekundami" % seconds
 		else:
-			time_str = "%d second" % seconds
+			time_str = "%d sekundou" % seconds
 	elif (raw_secs >= 60) and (raw_secs < (60 * 60)):
 		minutes = (raw_secs/60)
 		if minutes > 1:
-			time_str = "%d minutes" % minutes
+			time_str = "%d minutami" % minutes
 		else:
-			time_str = "%d minute" % minutes
+			time_str = "%d minutou" % minutes
 	elif (raw_secs >= (60*60) and (raw_secs < (60 * 60 * 24))):
 		minutes = (raw_secs/60)
 		hours = (minutes/60)
 		if hours > 1:
-			time_str = "%d hours" % hours
+			time_str = "%d hodinami" % hours
 		else:
-			time_str = "%d hour" % hours
+			time_str = "%d hodinou" % hours
 	elif (raw_secs >= (60*60*24) and (raw_secs < (60*60*24*30))):
 		minutes = (raw_secs/60)
 		hours = (minutes/60)
 		days = (hours/24)
 		if days > 1:
-			time_str = "%d days" % days
+			time_str = "%d dny" % days
 		else:
-			time_str = "%d day" % days
-	elif (raw_secs >=(60*60*24*30)) and (raw_secs < (60*60*24*365)):		
+			time_str = "%d dnem" % days
+	elif (raw_secs >=(60*60*24*30)) and (raw_secs < (60*60*24*365)):
 		minutes = (raw_secs/60)
 		hours = (minutes/60)
 		days = (hours/24)
@@ -12790,7 +12972,7 @@ def time_since_creation(item_epoch_var):
 	else:
 		logging.error("something wrong with time_since_creation function")
 		time_str = None
-	return time_str		
+	return time_str
 def check_url(url_str):
 	link_var = url_str
 	deadLinkFound = check_url_instance(link_var)
@@ -12840,7 +13022,7 @@ def is_ascii_stl(blobinfo_instance):
 		is_stl = False
 		return is_stl
 		#raise IOError("Too many inputs to first line")
-	
+
 	triangles = []
 	norms = []
 
@@ -12902,7 +13084,7 @@ def is_ascii_stl(blobinfo_instance):
 	return is_stl
 	#return SolidSTL(title, triangles, norms)
 	##############################################
-	
+
 	# #old version
 	# input_file_list = input_file.readlines()
 	# for line in input_file_list:
@@ -12958,7 +13140,7 @@ def remove_unsafe_chars_from_tags(tag_list):
 		tag = "".join(escaped_string)
 		escaped_list.append(tag)
 	new_tag_list = escaped_list
-	return new_tag_list 
+	return new_tag_list
 def return_printed_by_list(obj_id, update=False, delay=0):
 	key = 'printed_by_list_%d' % int(obj_id)
 	users_who_have_printed = memcache.get(key)
@@ -12995,7 +13177,7 @@ def new_note(recipient_id, note_text, delay=0):
 	#logging.warning(user.new_note_list)
 	user.put()
 	# This here is a big problem for follower lists
-	# each time a popular contributer makes a post, 
+	# each time a popular contributer makes a post,
 	# every follower (active or not) will get a write.
 	# my alternative idea now, is to have a new user following list
 	# and then another "last checked" date. It would then load notes
@@ -13071,7 +13253,7 @@ def convert_text_to_markdown(string):
 	escaped_text = cgi.escape(string)
 	mkd_converted_string = mkd.convert(escaped_text)
 	return mkd_converted_string
-			
+
 
 #########################################################
 def user_update(update=False):
@@ -13164,10 +13346,10 @@ def wikientry_update(update=False):
 			counter += 1
 #wikientry_update(update = True)
 #########################################################
-## if db is empty, this creates default db entries and cache 
+## if db is empty, this creates default db entries and cache
 ## to prevent unnessisary querys ##
 def app_start_cache(update = False):
-	# Disregard for the most part. This is only run to make sure there are default objects for all models. 
+	# Disregard for the most part. This is only run to make sure there are default objects for all models.
 	key = 'app_start_cache'
 	default_db_entries = memcache.get(key)
 	if default_db_entries is None or update:
@@ -13181,7 +13363,7 @@ def app_start_cache(update = False):
 
 		else:
 			pass
-		
+
 		obj_var = db.GqlQuery("SELECT * FROM Objects").get()
 		logging.warning("DB initilization Query Objects")
 		if obj_var == None:
@@ -13210,7 +13392,7 @@ def app_start_cache(update = False):
 
 		else:
 			pass
-		
+
 		# vote_var = db.GqlQuery("SELECT * FROM Vote").get()
 		# logging.warning("DB initilization Query Vote")
 		# if vote_var == None:
@@ -13238,15 +13420,17 @@ def app_start_cache(update = False):
 #########################################################
 #########################################################
 REFERER_BLACKLIST = [
-	'/login', 
-	'/logout', 
-	'/signup', 
-	'/welcome', 
+	'/login',
+	'/logout',
+	'/signup',
+	'/welcome',
 	'/user_page_img_upload',
 	'/object_img_upload',
 	'/object_img_delete',
 	'/visitor_img_upload']
-REG_EX = r'(/(?:[a-zA-Z0-9_-]+/?)*)'
+
+REG_EX = r'(.*)'
+
 app = webapp2.WSGIApplication([
 		('/', MainEverything),
 		(r'/page/(\d+)', MainEverything),
@@ -13258,7 +13442,7 @@ app = webapp2.WSGIApplication([
 
 		('/signup', SignUpPage),
 		('/welcome', WelcomePage),
-		('/contact', ContactPage),	
+		('/contact', ContactPage),
 		('/login', LoginPage),
 		('/logout', LogoutPage),
 
@@ -13294,14 +13478,14 @@ app = webapp2.WSGIApplication([
 
 		('/university', UniMain),
 		('/newuniversity', UniMainNew),
-		('/topuniversity', UniMainTop),	
+		('/topuniversity', UniMainTop),
 		('/video', UniMainVideo),
 		('/newlesson', NewLessonPage),
 		('/ask', NewAskPage),
 
 		('/news', NewsPage),
 		('/newnews', NewsPageNew),
-		('/topnews', NewsPageTop),	
+		('/topnews', NewsPageTop),
 		('/newarticle', NewArticlePage),
 
 		('/parts', RepRapTypesPage),
@@ -13310,8 +13494,8 @@ app = webapp2.WSGIApplication([
 		### tag_error is commented out above ###
 		('/tag_error', TagMainError),
 		###
-		(r'/tag/([a-zA-Z0-9_-]+)', TagPage),
-		
+		(r'/tag/(.*)', TagPage),
+
 		('/nsfw', NsfwPage),
 
 		('/new', NewPage),
@@ -13367,8 +13551,9 @@ app = webapp2.WSGIApplication([
 		('/robots.txt', Robots),
 
 		('/serve_obj/([^/]+)?', ObjFileServe),
-		], debug=True)
+	], debug=True)
 ################## Error Handlers #######################
+
 def handle_404(request, response, exception):
 	logging.exception(exception)
 	response.write('''
@@ -13390,50 +13575,50 @@ def handle_404(request, response, exception):
 		<div>
 			<div style="
 				float:left;
-				width:100%; 
-				text-decoration:none; 
+				width:100%;
+				text-decoration:none;
 				background: white;
 				color:#777;
 				">
 				<span style="float:left;">
 					<a href="/" style="
-						text-decoration:none; 
-						font-weight:bold; 
-						font-size:120%; 
+						text-decoration:none;
+						font-weight:bold;
+						font-size:120%;
 						">
 						<span style="
-							color: #0077cc; 
+							color: #0077cc;
 							float: left;
 							margin-left: 10px;
 							margin-top: 3px;
-							margin-right: 40px;			
+							margin-right: 40px;
 							">
 							<img src="/img/glassesprint.png" height="18px"/>
-							Bld3r
+							Cool3D
 						</span>
 					</a>
 					<span style="margin-top:5px; float:left;">
 						<span  style="margin-right:5px;" title="New to 3d printing? Learn at Bld3r university.">
-							<a href="/university">	
-								learn
+							<a href="/university">
+								Lekce
 							</a>
 						</span>
 						|
 						<span  style="margin-right:5px;" title="News about 3d printing.">
-							<a href="/news">	
-								news
+							<a href="/news">
+								Zpravy
 							</a>
 						</span>
 						|
 						<span  style="margin-right:5px; margin-left:5px;" title="Bld3r's wiki.">
 							<a href="/w/home">
-								community
+								Komunita
 							</a>
 						</span>
 						|
 						<span  style="margin-right:5px;  margin-left:5px;" title="Search for an object.">
 							<a style="text-decoration:none;" href="/tag">
-								search
+								Hledani
 							</a>
 						</span>
 					</span>
@@ -13443,9 +13628,9 @@ def handle_404(request, response, exception):
 			</div>
 
 			<div style="
-				width: 920px; 
-				display: block; 
-				margin-right: auto; 
+				width: 920px;
+				display: block;
+				margin-right: auto;
 				margin-left: auto;
 				">
 				<img src="/img/404_2.png" />
@@ -13475,50 +13660,50 @@ def handle_500(request, response, exception):
 		<div>
 			<div style="
 				float:left;
-				width:100%; 
-				text-decoration:none; 
+				width:100%;
+				text-decoration:none;
 				background: white;
 				color:#333;
 				">
 				<span style="float:left;">
 					<a href="/" style="
-						text-decoration:none; 
-						font-weight:bold; 
-						font-size:120%; 
+						text-decoration:none;
+						font-weight:bold;
+						font-size:120%;
 						">
 						<span style="
-							color: #333; 
+							color: #333;
 							float: left;
 							margin-left: 10px;
 							margin-top: 3px;
-							margin-right: 40px;			
+							margin-right: 40px;
 							">
 							<img src="/img/empty_white_favicon.png" height="18px"/>
-							Bld3r
+							Cool3D
 						</span>
 					</a>
 					<span style="margin-top:5px; float:left;">
 						<span  style="margin-right:5px;" title="New to 3d printing? Learn at Bld3r university.">
-							<a href="/university">	
-								learn
+							<a href="/university">
+								Lekce
 							</a>
 						</span>
 						|
 						<span  style="margin-right:5px;" title="News about 3d printing.">
-							<a href="/news">	
-								news
+							<a href="/news">
+								Zpravy
 							</a>
 						</span>
 						|
 						<span  style="margin-right:5px; margin-left:5px;" title="Bld3r's wiki.">
 							<a href="/w/home">
-								community
+								Komunita
 							</a>
 						</span>
 						|
 						<span  style="margin-right:5px;  margin-left:5px;" title="Search for an object.">
 							<a style="text-decoration:none;" href="/tag">
-								search
+								Hledani
 							</a>
 						</span>
 					</span>
@@ -13528,9 +13713,9 @@ def handle_500(request, response, exception):
 			</div>
 
 			<div style="
-				width: 920px; 
-				display: block; 
-				margin-right: auto; 
+				width: 920px;
+				display: block;
+				margin-right: auto;
 				margin-left: auto;
 				">
 				<img src="/img/500.png" />
@@ -13539,4 +13724,3 @@ def handle_500(request, response, exception):
 		''')
 	response.set_status(500)
 app.error_handlers[500] = handle_500
-
