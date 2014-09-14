@@ -22,7 +22,7 @@
 							width:auto;"
 				>
 
-					log out
+					Odhlásit
 
 				</div>
 			</a>
@@ -58,7 +58,7 @@
 							height: 24px;  
 							width:auto;"
 				>
-					log in
+					Přihlásit
 
 				</div>
 			</a>
@@ -75,7 +75,7 @@
 							height: 24px;  
 							width:auto;"
 				>
-					sign up
+					Registrovat
 
 				</div>
 			</a>			
@@ -85,13 +85,13 @@
 	{% if user %}
 		{% if user.has_note == True %}
 			<span class="see_notes">
-				<a style = "padding-top:3px; float:right; margin-right:5px;" href="/user/note/{{user.key().id()}}" title="You have notification(s)!">
+				<a style = "padding-top:3px; float:right; margin-right:5px;" href="/user/note/{{user.key().id()}}" title="Máte nové zprávy!">
 					<img src="/img/frenvelope.png" height="30px" />
 				</a>
 			</span>
 		{% else %}
 			<span class="no_notes">
-				<a style = "padding-top:3px; float:right; margin-right:5px;" href="/user/note/{{user.key().id()}}" title="No new notifications.">
+				<a style = "padding-top:3px; float:right; margin-right:5px;" href="/user/note/{{user.key().id()}}" title="Žádné nové zprávy.">
 					<img src="/img/frenvelope_empty.png" height="30px" />
 				</a> 
 			</span>

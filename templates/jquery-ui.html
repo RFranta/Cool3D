@@ -19,11 +19,11 @@
 	<![endif]-->
 	<meta charset="utf-8">
 	<title>
-		Bld3r Object Upload
+		Cool3D nahrávání objektu
 	</title>
-	<meta name="description" content="Bld3r.com is a 3D printing community for both beginners and enthusiasts. Maybe you have creations you want to share with others, or maybe you just want to learn how to do basic 3D modeling or find out which printer is right for you. We like to print in 3D, and we want to make it easier for everyone." />
-
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="keywords" content="3D modely, 3D tisk, 3D , 3D tisk sociální síť, reprap, fabrication STL, soubory k 3D tisku, gcode, open source, obj" />	
+	<meta name="description" content="Cool3d.cz je stránka pro milovníky 3D tisku. Můžeš zde stahovat či sdílet 3D modely k vytisknutí nebo se podívat na novinky a lekce ze světa 3D tisku" />
+	<meta property="og:image" content="http://www.bld3r.com/img/bld3r_cover.png" />	
 	<!-- jQuery UI styles -->
 	<link rel="stylesheet" href="/css/jquery-ui.css" id="theme">
 	<!-- Demo styles -->
@@ -50,7 +50,7 @@
 	{% include "header3.html" %}
 	<div class="main_div">
 
-		<h2>New Object</h2>
+		<h2>Nový objekt</h2>
 		
 		{% if error_no_file_uploaded %}
 			<h2>
@@ -71,15 +71,12 @@
 			<div style="background: #fafafa; width:450px; border: solid 1px black; border-radius: 6px;" >
 				<div style="text-align: center; margin: 5px; font-size:10px; color:#999;">
 					<span style="font-size:18px; color:black;">
-						Drop your files anywhere and scroll down
+						Upusť kdekoliv své soubory a zaroluj dolů
 					</span>
 						<br>
-						Accepted types: 
-							{% for filetype in accepted_file_extentions %}
-								.{{ filetype }}{% if not loop.last%},{% endif %}
-							{% endfor %}
+						Akceptované typy souborů: stl, png, jpg, or gif
 						<br>
-						Size limit: 5mb
+						Limitovaná velikost: 5mb
 				</div>
 			</div>
 			<br>
@@ -90,7 +87,7 @@
 			<input type="hidden" name="obj_id_post" value="{{obj_id}}">
 			<input type="hidden" name="verify" value="{{verify_hash}}">
 			
-			<input placeholder="Title" type="text" name="title_post" value="{{title}}" style="width:450px; font-size:14px;">
+			<input placeholder="Popis" type="text" name="title_post" value="{{title}}" style="width:450px; font-size:14px;">
 
 			{% if error_title %}
 				<br>
@@ -103,21 +100,21 @@
 			<br>
 			<!--     <input placeholder="Description" style="width:450px; height: 50px; font-size:18px;"/>
 			 -->    
-			<textarea name="description_post" placeholder="Description" style="width:450px; height:100px; font-size:14px;" >{{description}}</textarea>
+			<textarea name="description_post" placeholder="Popis" style="width:450px; height:100px; font-size:14px;" >{{description}}</textarea>
 			<br>
 			<br>
-			<input type="text" name="tags_post" value="{{tags}}" placeholder="Tags (separate with commas)" style="width:450px; font-size:14px;" >
+			<input type="text" name="tags_post" value="{{tags}}" placeholder="Štítky (oddělte čárkami)" style="width:450px; font-size:14px;" >
 			<!--     <input type="text" name="tags" value="{{tags}}" style="width:450px;">
 			-->    
 			<br>
 			<br>
 			<select name="is_author_post" id="is_author_post" class="is_author" style="width:450px; font-size:20px;" >
-				<option value="is_author" id="is_author" class="is_author" selected>I am the author of this object.</option>
+				<option value="is_author" id="is_author" class="is_author" selected>Jsem autor tohoto objektu..</option>
 				<option value="" disabled="disabled"></option>   
-				<option value="" id="not_author" class="is_author" {% if not is_author %}selected{% endif %}>I am NOT the author of this object.</option>
+				<option value="" id="not_author" class="is_author" {% if not is_author %}selected{% endif %}>Nejsem autor tohoto objektu.</option>
 				<optgroup label="">   
-					<option value="" disabled="disabled">If you are not the author of this object,</option>   
-					<option value="" disabled="disabled">please consider linking to it instead.</option>
+					<option value="" disabled="disabled">Pokud nejste tvůrci tohoto objektu,</option>   
+					<option value="" disabled="disabled">zvažte raději uložení odkazu na objekt.</option>
 				</optgroup>
 			</select>
 			<br>
@@ -133,7 +130,7 @@
 		
 
 			<select name="license_post" class="if_author" style="width:450px; font-size:20px; {% if not is_author %} display:none; {% endif %}" >
-				<option disabled="disabled" selected>Select a Creative Commons (CC) License</option>
+				<option disabled="disabled" selected>Zvolte Creative Commons (CC) Licenci</option>
 					<option class="is_author" value="cc_pd" {% if license == "cc_pd" %}selected{% endif %}>CC - Public Domain Dedication</option>
 					<option class="is_author" value="cc_a" {% if license == "cc_a" %}selected{% endif %}>CC - Attribution</option>
 					<option class="is_author" value="cc_a_sa" {% if license == "cc_a_sa" %}selected{% endif %}>CC - Attribution - Share Alike</option>
@@ -143,14 +140,14 @@
 					<option class="is_author" value="bsd" {% if license == "bsd" %}selected{% endif %}>BSD License</option>
 			</select>
 			<select name="sublicense_post" class="if_not_author" style="width:450px; font-size:20px; {% if is_author %} display:none; {% endif %}">
-				<option disabled="disabled" {% if not sublicense %}selected{% endif %}>Select the Author's License</option>
+				<option disabled="disabled" {% if not sublicense %}selected{% endif %}>Vyberte autorskou licenci</option>
 					<option class="creator_license" value="cc_pd" {% if sublicense == "cc_pd" %}selected{% endif %}>CC - Public Domain Dedication</option>
 					<option class="creator_license" value="cc_a" {% if sublicense == "cc_a" %}selected{% endif %}>CC - Attribution</option>
 					<option class="creator_license" value="cc_a_sa" {% if sublicense == "cc_a_sa" %}selected{% endif %}>CC - Attribution - Share Alike</option>
 					<option class="creator_license" value="cc_lgpl" {% if sublicense == "cc_lgpl" %}selected{% endif %}>CC - GNU Lesser General Public License</option>
 					<option class="creator_license" value="bsd" {% if sublicense == "bsd" %}selected{% endif %}>BSD License</option>  
-				<option value="" disabled="disabled">If the author has not licensed the object under any of the above,</option>   
-				<option value="" disabled="disabled">we cannot host the object. Consider linking to it instead.</option>         
+				<option value="" disabled="disabled">Pokud autor objektu nepublikoval soubor pod jednou z těchto licencí,</option>   
+				<option value="" disabled="disabled">nemůžeme tento soubor sdílet. Zvažte raději uložení odkazu.</option>         
 			</select>   
 			<br>
 			{% if error_attribution %}
@@ -160,25 +157,25 @@
 			{% endif %}
 			<span class="creator" {% if is_author %} style="display:none;" {% endif %}> 
 				<br>
-				<input placeholder="Author attribution" style="width:450px; font-size:14px;" type="text" name="creator_post" value="{{creator}}">
+				<input placeholder="Autorské svolení" style="width:450px; font-size:14px;" type="text" name="creator_post" value="{{creator}}">
 				<br>
 			</span>
 			<br>
 			<select name= "audience_post" style="width:450px; font-size: 20px;">
-				<option name="audience" value="kids" {% if audience == "kids" %}selected{% endif %}>This object is okay for everyone.</option>
-				<option name="audience" value="sfw" {% if audience == "sfw" %}selected{% endif %}>This object is sfw, but not okay for kids.</option>
-				<option name="audience" value="nsfw" {% if audience == "nsfw" %}selected{% endif %}>This object is nsfw.</option>   
+				<option name="audience" value="kids" {% if audience == "kids" %}selected{% endif %}>Tento objekt je vhodný po všechny.</option>
+				<option name="audience" value="sfw" {% if audience == "sfw" %}selected{% endif %}>Není vhodný pro děti.</option>
+			 
 			</select>
 			<br>  
 			<br>  
 			<input type="checkbox" name="food_related_post" value="True" {% if food_related %}checked{% endif %}>
-			Food or drink related.
+			Souvisí s jídlem či pitím?
 			<br>
-			<input type="checkbox" name="rights_post" value="yes" {% if upload and not rights %}{% else %}checked{% endif %}> Uploading this objects conforms to our <a href="/tos" target="_blank">terms of service</a>.
+			<input type="checkbox" name="rights_post" value="yes" {% if upload and not rights %}{% else %}checked{% endif %}> Nahráním tohoto souboru potvrzujete naše <a href="/tos" target="_blank">podmínky použití</a>.
 			<br>
 			{% if upload %}
 			<br>
-			<input type="submit" value="Update the data above">
+			<input type="submit" value="Upravit data nad tímto tlačítkem">
 			<br>
 			{% endif %}
 			{% if upload %}
@@ -201,12 +198,12 @@
 						<span class="fileinput-button" style="background: #fafafa; width:450px;" title="Or you can click here to upload individual files.">
 							<span style="font-size:10px; color:#999;">
 								<span style="font-size:18px; color:black;">
-									Drop your files anywhere
+									Upusť své soubory kdekoliv nad prohlížečem
 								</span>
 									<br>
-									Accepted types: stl, png, jpg, or gif
+									Akceptované soubory: stl, png, jpg, or gif
 									<br>
-									Size limit: 5mb
+									Limitovaná velikost: 5mb
 							</span>
 							<input type="file" name="files[]" multiple>
 						</span>
@@ -238,10 +235,10 @@
 						<span class="fileinput-button" style="background: #D7EBFF; width:450px;">
 							<span style="font-size:10px; color:#999;">
 								<span style="font-size:18px; color:black;">
-									All done?
+									Hotovo?
 								</span>
 									<br>
-									Click here to go to your new object's page!
+									Klikněte sem pro nahrání nového objektu!
 							</span>
 						</span>
 					</a>
@@ -249,7 +246,7 @@
 				</div>
 			{% else %}
 				<br>
-				<button type="submit" class="//start" style="//width:450px;">Activate upload area</button>
+				<button type="submit" class="//start" style="//width:450px;">Aktivovat ukládací prostor</button>
 				<br>
 				<br>
 			{% endif %}
@@ -257,7 +254,7 @@
 
 		{% if create_obj_img_table %}
 			<br>
-			Already uploaded:
+			Již uloženo:
 			<table style="border: none; width: auto;">
 				{% for image_tuple in obj_image_link_list %}
 					<tr style="border: 1px solid red;">
@@ -312,7 +309,7 @@
 								<strong class="error"></strong>
 							</td>
 							<td>
-								<p class="size">Processing...</p>
+								<p class="size">Probíhá nahrávání...</p>
 								<div class="progress"></div>
 							</td>
 							<td>
@@ -320,7 +317,7 @@
 									<button class="start" disabled>Start</button>
 								{% } %}
 								{% if (!i) { %}
-									<button class="cancel">Cancel</button>
+									<button class="cancel">Zrušit</button>
 								{% } %}
 							</td>
 						</tr>
@@ -351,7 +348,7 @@
 								<span class="size">{%=o.formatFileSize(file.size)%}</span>
 							</td>          
 							<td>
-								<button class="delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>Delete</button>
+								<button class="delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>Vymazat</button>
 								<input type="checkbox" name="delete" value="1" class="toggle">
 							</td>
 						</tr>

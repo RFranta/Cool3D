@@ -10,7 +10,7 @@
 				{% else %}
 					<a class="masonry_img_link" href="/obj/{{object.id}}">
 						<span class="front_link_img_hover_text" >
-							&nbsp;bld3r.com&nbsp;
+							&nbsp;cool3D.cz&nbsp;
 						</span>						
 				{% endif %}
 					<img class="lazy" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-original="{{object.main_img_link}}">
@@ -101,7 +101,7 @@
 					margin-top: 0px;
 				{% endif %}
 				">
-				tutorial
+				Lekce
 			</div>
 		{% elif object.obj_type == "ask" %}
 			<div style="
@@ -116,7 +116,7 @@
 					margin-top: 0px;
 				{% endif %}
 				">
-				question
+				Otázka
 			</div>
 		{% elif object.obj_type == "news" %}
 			<div style="
@@ -131,7 +131,7 @@
 					margin-top: 0px;
 				{% endif %}
 				">
-				news
+				Zpráva
 			</div>
 		{% endif %}
 	{% endif %}
@@ -265,13 +265,13 @@
 				{% else %}
 					<br>
 					<span class="short_url">
-						bld3r.com
+						Cool3D.cz
 					</span>					
 				{% endif %}
 				<br>
 			{% endif %}
 			<span style="color: #999;">
-				{{object.time_since}} ago
+				před  {{object.time_since}} 
 			</span>
 			<br>
 			<a href="/user/{{object.author_id}}">
@@ -297,7 +297,7 @@
 					<a href="/obj/{{object.obj_ref_id}}">
 				{% endif %}
 					<span style="color:#0077cc;">
-						context
+						Důvod
 					</span>
 				</a>
 
@@ -305,11 +305,11 @@
 				<a href="/obj/{{object.id}}">
 					{% if object.obj_type == 'ask' %}
 						<span style="color:#0077cc;">
-							answers {{object.num_comments}}
+							Odpovědi {{object.num_comments}}
 						</span>
 					{% else %}
 						<span style="color:#0077cc;">
-							comments {{object.num_comments}}
+							Komentáře {{object.num_comments}}
 						</span>
 					{% endif %}
 				</a>

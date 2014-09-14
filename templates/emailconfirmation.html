@@ -36,18 +36,18 @@
 	{% include "header3.html" %}	
 	{% if no_email %}
 		<div>
-			You must
+			Musíte se
 			<a href="/login">
-				log in
+				přihlásit
 			</a>
-			to confirm your email address.
+			abyste potvrdili svou emailovou adresu.
 		</div>
 	{% else %}
 		<h1 name="message">
 			{{message}}
 		</h1>	
 		<hr>
-		<a href="/">home</a>
+		<a href="/">Domů</a>
 	{% endif %}
 </body>
 </html>

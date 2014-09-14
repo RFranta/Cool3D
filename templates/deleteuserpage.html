@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>
-		Bld3r
+		Cool3D
 	</title>
 	<link type="text/css" rel="stylesheet" href="/css/front.css" />
 	<style>
@@ -44,7 +44,7 @@
 	</h1>
 
 	<h1>
-		User:
+		Uživatel:
 	</h1>	
 	<h2>
 		{{username}}
@@ -53,10 +53,10 @@
 
 	<form method="post">
 		<input type="checkbox" name="delete" value="True"> 
-		Are you sure you want to delete this account? 
+		Jste si jistý, že chcete vymazat tento účet? 
 		<br>
 		<span style="color:red;">
-			This may take a while if you've uploaded a lot of data...
+			Tento proces může trvat déle, pokud jste nahráli hodně dat?
 		</span>
 		<input type="hidden" name="verify" value="{{user_hash}}">
 		<input type="submit" value="Confirm and Delete">
@@ -80,7 +80,7 @@
 						</a>
 						,
 						<br>
-						created by {{thing.author_name}},
+						vytvořeno {{thing.author_name}},
 						<br>
 						{{thing.created}}
 					</div>
@@ -91,12 +91,12 @@
 						</a>
 						,
 						<br>
-						created by {{thing.author_name}},
+						vytvořeno {{thing.author_name}},
 						<br>
 						{{thing.created}}
 						<br>
 						<a href="/obj/{{thing.key().id()}}">
-							comments
+							komentáře
 						</a>
 					</div>
 				{% endif %}
@@ -105,11 +105,11 @@
 					{{thing.the_comment}}
 					<br>
 					<a href="/obj/{{thing.obj_ref_id}}">
-						context
+						důvod
 					</a>
 					,
 					<br>
-					created by {{thing.author_name}},
+					vytvořeno {{thing.author_name}},
 					<br>
 					{{thing.created}}
 					<br>

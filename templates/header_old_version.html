@@ -5,19 +5,19 @@
 				{{user.username}}
 			</a>
 			:
-			<a style="text-decoration:none;" href="/logout">log out</a>
+			<a style="text-decoration:none;" href="/logout">Odhlásit</a>
 			
 		{% else %}
-			<a style="text-decoration:none;" href="/signup">sign up</a>
+			<a style="text-decoration:none;" href="/signup">Registrovat</a>
 			:
-			<a style="text-decoration:none;" href="/login">log in</a>
+			<a style="text-decoration:none;" href="/login">Přihlásit</a>
 			
 		{% endif %}
 	</span>
 	<span style='float:left'>
 		<img src="favicon.ico" width="40" height="auto" />
 		<a style="text-decoration:none;" href="/">
-			Bld3r
+			Cool3D
 		</a>
 	</span>
 	{% if user %}
@@ -31,7 +31,7 @@
 						{{note | safe}}
 					</div>
 				{% endfor %}
-				<a style = "float:right;" href="/user/note/{{user.key().id()}}">notification page</a>
+				<a style = "float:right;" href="/user/note/{{user.key().id()}}">Potvrzovací stránka</a>
 				<br>
 			</div>
 		{% else %}

@@ -19,10 +19,11 @@
 <![endif]-->
 <meta charset="utf-8">
 <title>
-    Bld3r Object Upload
+    Cool3D nmahrání objektu
 </title>
-<meta name="description" content="Bld3r.com is a 3D printing community for both beginners and enthusiasts. Maybe you have creations you want to share with others, or maybe you just want to learn how to do basic 3D modeling or find out which printer is right for you. We like to print in 3D, and we want to make it easier for everyone." />
-
+	<meta name="keywords" content="3D modely, 3D tisk, 3D , 3D tisk sociální síť, reprap, fabrication STL, soubory k 3D tisku, gcode, open source, obj" />	
+	<meta name="description" content="Cool3d.cz je stránka pro milovníky 3D tisku. Můžeš zde stahovat či sdílet 3D modely k vytisknutí nebo se podívat na novinky a lekce ze světa 3D tisku" />
+	<meta property="og:image" content="http://www.bld3r.com/img/bld3r_cover.png" />	
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- jQuery UI styles -->
 <link rel="stylesheet" href="/css/jquery-ui.css" id="theme">
@@ -47,7 +48,7 @@
 <noscript><link rel="stylesheet" href="/css/jquery.fileupload-ui-noscript.css"></noscript>
 </head>
 <body>
-<h2>New Object</h2>
+<h2>Nový objekt</h2>
 
 <!-- The file upload form used as target for the file upload widget -->
 <form id="fileupload" action="{{stl_img_upload_url}}" method="POST" enctype="multipart/form-data">
@@ -69,7 +70,7 @@
     <br>
    
     <select class="creative_commons" style="width:450px; font-size:20px;">
-      <option value="" disabled="disabled" selected="selected">Select a Creative Commons (CC) License</option>
+      <option value="" disabled="disabled" selected="selected">Vyberte Creative Commons (CC) Licenci</option>
           <optgroup id="If your ARE the author:" label="If your ARE the author:">   
               <option class="is_author" name="license" value="cc_pd" {% if cc_pd %}selected{% endif %}>CC - Public Domain Dedication</option>
               <option class="is_author" name="license" value="cc_a" {% if cc_a %}selected{% endif %}>CC - Attribution</option>
@@ -86,8 +87,8 @@
           <option class="creator_license" name="license" value="cc_lgpl" {% if cc_lgpl %}selected{% endif %}>CC - GNU Lesser General Public License</option>
           <option class="creator_license" name="license" value="bsd" {% if bsd %}selected{% endif %}>BSD License</option>  
         </optgroup>
-      <option value="" disabled="disabled">If the author has not licensed the object under any of the above,</option>   
-      <option value="" disabled="disabled">we cannot host the object. Consider linking to it instead.</option>         
+      <option value="" disabled="disabled">Pokud autor nesdílel soubor pod žádnou z těchto licencí,</option>   
+      <option value="" disabled="disabled">bohužel ho nemůžete použít. Zvažte raději uložení odkazu.</option>         
     </select>   
     <br>
     <span class="creator" style="display: none;"> 
@@ -97,16 +98,16 @@
     </span>
     <br>
     <select style="width:450px; font-size: 20px;">
-    <option name="audience" value="kids" {% if kids %}selected{% endif %}>This object is okay for everyone.</option>
-    <option name="audience" value="sfw" {% if sfw %}selected{% endif %}>This object is sfw, but not okay for kids.</option>
-    <option name="audience" value="nsfw" {% if nsfw %}selected{% endif %}>This object is nsfw.</option>   
+    <option name="audience" value="kids" {% if kids %}selected{% endif %}>Tento objekt je vhodný pro každého.</option>
+    <option name="audience" value="sfw" {% if sfw %}selected{% endif %}>Nevhodné pro děti.</option>
+    <option name="audience" value="nsfw" {% if nsfw %}selected{% endif %}></option>   
     </select>
     <br>  
     <br>  
     <input type="checkbox" name="food_related" value="True" {% if food %}checked{% endif %}>
-    Food or drink related.
+    Souvisí s jídlem a pitím.
     <br>
-    <input type="checkbox" name="rights" value="yes"> I have the <a href="/tos" target="_blank">rights</a> to share these files.
+    <input type="checkbox" name="rights" value="yes"> Vlastním<a href="/tos" target="_blank">práva</a> ke sdílení těchto souborů.
     <br>
 
     <!-- Redirect browsers with JavaScript disabled to the origin page -->
@@ -127,18 +128,18 @@
             <span class="fileinput-button" style="background: #fafafa; width:450px;" title="Or you can click here to upload individual files.">
                 <span style="font-size:10px; color:#999;">
                     <span style="font-size:18px; color:black;">
-                        Drop your files anywhere
+                        Upusttě tento subor kdekoliv
                     </span>
                         <br>
-                        Accepted types: stl, png, jpg, or gif
+                        Akceptované typy souborů: stl, png, jpg, nebo gif
                         <br>
-                        Size limit: 5mb
+                        Limit: 5mb
                 </span>
                 <input type="file" name="files[]" multiple>
             </span>      
             <br>  
             <br>     
-            <button type="submit" class="start" style="width:450px;">Upload</button>
+            <button type="submit" class="start" style="width:450px;">Nahrát</button>
             <br>
             <br>
 <!--        Show only when needed.     
@@ -175,15 +176,15 @@
                 <strong class="error"></strong>
             </td>
             <td>
-                <p class="size">Processing...</p>
+                <p class="size">Probíhá nahrávání...</p>
                 <div class="progress"></div>
             </td>
             <td>
                 {% if (!i && !o.options.autoUpload) { %}
-                    <button class="start" disabled>Start</button>
+                    <button class="start" disabled>Začít nahrávání</button>
                 {% } %}
                 {% if (!i) { %}
-                    <button class="cancel">Cancel</button>
+                    <button class="cancel">Zrušit</button>
                 {% } %}
             </td>
         </tr>
@@ -207,14 +208,14 @@
                     {%=file.name%}
                 </p>
                 {% if (file.error) { %}
-                    <div><span class="error">Error</span> {%=file.error%}</div>
+                    <div><span class="error">Chyba</span> {%=file.error%}</div>
                 {% } %}
             </td>
             <td>
                 <span class="size">{%=o.formatFileSize(file.size)%}</span>
             </td>          
             <td>
-                <button class="delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>Delete</button>
+                <button class="delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>Vymazat</button>
                 <input type="checkbox" name="delete" value="1" class="toggle">
             </td>
         </tr>

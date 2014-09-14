@@ -3,9 +3,9 @@
 <head>
 	
 	<title>
-		Bld3r Upload Step 1
+		Cool3D nahrání souboru krok 1
 	</title>
-	<meta name="description" content="Bld3r.com is a 3D printing community for both beginners and enthusiasts. Maybe you have creations you want to share with others, or maybe you just want to learn how to do basic 3D modeling or find out which printer is right for you. We like to print in 3D, and we want to make it easier for everyone." />
+	<meta name="description" content="Cool3D je stránka pro sdílení a stahování 3D souborů ke stažení, navíc můžete sdílet novinky a lekce ze světa 3D tisku" />
 	<meta property="og:image" content="http://www.bld3r.com/img/bld3r_cover.png" />		
 	{% include "scripts.html" %}
 		
@@ -74,9 +74,9 @@
 			<div class="top" style="width:1000px; margin-top:20px;">
 				<img src="/img/up.ico" width="100px" height="auto" />
 				<div>
-					Step 1 of 3:	
+					Krok 1 z 3:	
 					<br>
-					Upload your file			
+					Nahrajte soubory			
 				</div>
 			</div>
 			<div style="padding-top:10px;clear:both;">
@@ -87,7 +87,7 @@
 					<table>
 						<tr>
 							<td>		
-								Title
+								Název
 							</td>
 							<td>
 								<input type="text" name="title" value="{{title}}" style="width:450px; font-size:30px;">
@@ -101,9 +101,9 @@
 						</tr>
 						<tr>
 							<td>
-								.stl file
+								.stl soubor
 								<br>
-								(ascii only)
+								(pouze ascii)
 							</td>
 							<td>
 								<input type="file" name="file" value="{{main_file}}">
@@ -126,7 +126,7 @@
 							</td>
 							<td>
 								<input type="checkbox" name="rights" value="yes" {% if rights %} checked {% endif %}>
-								Sharing this file complies with the <a href="/tos" target="_blank">terms of service</a>.
+								Sdílením tohoto souboru souhlasíte s našimi <a href="/tos" target="_blank">podmínkami použití</a>.
 								{% if error_3 %}
 									{% if not file_error %}
 										<br>
@@ -139,19 +139,19 @@
 						</tr>
 						<tr>
 							<td>
-								License 
+								Licence 
 								<br>
 								<br>
 								<a href="http://creativecommons.org/choose/" target="_blank">
-									What is Creative Commons (CC)?
+									Co je Creative Commons (CC)?
 								</a> 
 							</td>
 							<td>
-								I
+								Já
 								<span style="color:green;">
-									am 
+									jsem
 								</span>
-								the author of this work:
+								autor této práce:
 								<br>
 								<div style="
 									margin-left:18px; 
@@ -159,7 +159,7 @@
 									margin-bottom: 6px; 
 									font-size: 12px;"
 									>
-									Creative Commons (CC) Licenses we accept:
+									Creative Commons (CC) soubory, které přijímáme:
 								</div>
 								<span class="is_author">
 									<input type="radio" name="license" value="cc_pd" {% if cc_pd %}checked{% endif %}> 
@@ -202,47 +202,47 @@
 									margin-bottom: 16px; 
 									font-size: 12px;
 									">
-									If the license you want does not appear in this list you must
+									Pokud zde licence není musíte místo toho
 									<a href="/newlink" target="_blank">
-										link 
+										nahrát odkaz
 									</a>
-									to it instead. Unfortunately, we only host files with these licenses.
+									
 								</div>
 								<span id="not_author">
 									<input type="radio" name="license" value="not_author" {% if not_author %}checked{% endif %}>
 								</span>
-								I am 
+								Já 
 								<span style="color:red;">
-									not 
+									nejsem
 								</span>
-								the author of this work. 
+								autor této práce. 
 								<br>
 								<span style="font-size:12px;">
-									(Please consider 
+									(Prosím zvažte 
 									<a href="/newlink">
-										linking
+										sdílení odkazu.
 									</a>
-									to this work instead, file storage costs money, links do not)
+									
 								</span>
 								<br>
 								<div id="sublicense" style="margin-left: 20px; opacity: 0; height: 0; display: none">
 									<br>
-									Author's license:
+									Autorská licence:
 									<br>
 									<div style="font-size:12px; margin-bottom:4px">
 										<span style="color:red;">
-											Required
+											Požadována
 										</span>
-										if submitting someone else's work.
-										Please take the time to make sure what you are sharing is licensed, by its original author and all other relevant authors, under one of follow licenses. 
+										při sdílení práce někoho jiného.
+										
 										<span style="color:red;">
-											If the author(s) has not licensed this under one of these licenses, we cannot host them.
+											Pokud autor nesdílel soubor pod žádnou z těchto licencí, nemůžete ho použít.
 										</span>
-										You should instead 
+										Místo toho můžete
 										<a href="/newlink">
-											link
+											sdílet link
 										</a> 
-										to where the author(s) hosts them.
+										na stránku s objektem.
 									</div>
 									<div style="margin-left: 20px; margin-bottom: 10px;">
 										<input type="radio" name="creator_license" value="cc_pd" {% if cc_pd %}checked{% endif %}> CC - Public Domain Dedication
@@ -261,18 +261,18 @@
 											margin-bottom: 6px; 
 											font-size: 13px;
 											">
-											If the required license does not appear in this list you must 
+											Pokud požadovaná license není na seznamu. 
 											<a href="/newlink" target="_blank">
-												link 
+												Sdílejte odkaz. 
 											</a>
-											to it instead. We only host files with these licenses.
+											
 										</div>
 									</div>
-									Author:
+									Autor:
 									<input type="text" name="creator" value="{{creator}}">
 									<br>
 									<div style="font-size:12px;">
-										(if attribution required)
+										
 									</div>
 								</div>
 								{% if need_license %}
@@ -289,25 +289,25 @@
 						{% if over18 == True %}				
 							<tr>
 								<td>
-									Audience
+									Určeno pro
 								</td>
 								<td>
-									<input type="radio" name="audience" value="kids" {% if kids %}checked{% endif %}> okay for everyone<br>
-									<input type="radio" name="audience" value="sfw" {% if sfw %}checked{% endif %}> sfw, but not okay for kids<br>
-									<input type="radio" name="audience" value="nsfw" {% if nsfw %}checked{% endif %}> nsfw
+									<input type="radio" name="audience" value="kids" {% if kids %}checked{% endif %}> vhodné pro každého<br>
+									<input type="radio" name="audience" value="sfw" {% if sfw %}checked{% endif %}> nevhodné pro děti<br>
+									<input type="radio" name="audience" value="nsfw" {% if nsfw %}checked{% endif %}> 
 								</td>					
 							</tr>
 						{% endif %}	
 						<tr>
 							<td>
-								Safety
+								Bezpečí
 							</td>
 							<td>
 								<input type="checkbox" name="food_related" value="True" {% if food %}checked{% endif %}>
-								Check if food/drink related 
+								Zaškrtněte pokud souvisí s jídlem a pitím.
 								<br>
 								<span style="font-size:12px;">
-									(We just remind people downloading these that not all materials are food safe)
+									
 								</span>
 							</td>
 						</tr>					
@@ -350,28 +350,28 @@
 				text-align: left;
 				">
 				<span style="font-size:30px; color:#d45e6a;">
-					How to Upload
+					Jak nahrát soubor
 				</span>
 				<br>
 				<span style="font-size:12px; color:#999;">
-					Upload freely and responsibly
+					
 				</span>
 				<br>
 				<br>
 				<span style="font-size:14px;">
-					You must be the rights holder of the print. 
+					Musíte být vlastník práv k souboru
 					<br>
 					<br>
-					The upload cannot be over 5mb.
+					Soubor nemůže být větší než 5mb.
 					<br>
 					<br>
-					Categorize prints for the right audience. 
+					Vyberte vhodnou kategorii pomocí štítků. 
 					<br>
 					<br>
-					Weapons and dangerous prints are prohibited.
+					Zbraně jsou zakázány.
 					<br>
 					<br>
-					Alert users if the prints will contact food or drink. Such prints may not be safe. 
+					
 				</span>
 			</div>
 

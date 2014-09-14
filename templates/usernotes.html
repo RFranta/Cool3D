@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>
-		Bld3r
+		Cool3D
 	</title>
 	{% include 'scripts.html' %}
 	<style>
@@ -72,9 +72,9 @@
 					<br>
 					<span style="float:left;">
 					{% if has_new_note %}
-						New notifications
+						Nové upozornění
 					{% else %}
-						All notifications 
+						Všechny upozornění
 					{% endif %}					</span> 						
 				</div>
 			</div>		  	
@@ -112,7 +112,7 @@
 									<br>
 								</div>
 								<div class="note_reply" id="{{note[2].key().id()}}" style="cursor:pointer;">
-									reply
+									Odpovědět
 								</div>
 								<div class="{{note[2].key().id()}}" id="form" style="display:none;">
 									<form method="post">
@@ -129,7 +129,7 @@
 										<input type="submit">
 										&nbsp; &nbsp; &nbsp;
 										<span id="cancel" class="{{note[2].key().id()}}" style="cursor:pointer;">
-											cancel
+											Zrušit
 										</span>
 									</form>
 								</div>

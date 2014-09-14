@@ -3,7 +3,7 @@
 <head>
 	
 	<title>
-		Bld3r
+		Cool3D
 	</title>
 	<script type="text/javascript" src="/js/jquery1.7.1min.js"></script>
 	<script type= "text/javascript" src="/js/vote.js"></script>
@@ -123,7 +123,7 @@
 
 <body>
 	<h1>
-		<a class="title" href="/">Bld3r</a>
+		<a class="title" href="/">Cool3D</a>
 	</h1>
 
 	{% if deleted == False %}
@@ -131,7 +131,7 @@
 		<div class="object_section">
 			<div class="top_group">
 				<h1>
-					Object: {{title}}
+					Objekt: {{title}}
 				</h1>
 
 				<div class="img_box">
@@ -146,7 +146,7 @@
 				{% if user_is_author == True %}
 					<div style="text-align:right; border:solid 1px; float:right; padding:5px; text-align:center;">
 						<a href="/obj/del/{{obj_id}}">
-							delete this object
+							Smazat tento objekt
 						</a>
 					</div>
 				{% else %}
@@ -159,7 +159,7 @@
 			</div>
 
 			<div name="obj_id">
-				Object id:
+				Id objektu:
 				{{obj_id}}
 			</div>
 
@@ -167,19 +167,19 @@
 
 			{% if obj_type == 'upload' %}
 				<div>
-					Type: 
-					Uploaded file
+					Typ: 
+					Nahraný soubor
 				</div>
 				<hr>
 				<div>
 					License:
 					{{license}}
 					<br>
-					This cannot be edited, if you want to change your license preference, please delete and resubmit your object.
+					Toto nemůže být smazáno.
 				</div>
 				<hr>
 				<div>
-					Description:
+					Popis:
 					<div class="description_current">
 						<br>
 						{{description}}
@@ -194,38 +194,38 @@
 						<br>
 						<span class="description_cancel">
 							<a href="#">
-								Cancel
+								Zrušit
 							</a>
 						</span>						
 					</div>
 					<div class="description_current">
 						<a href="#">
-							Edit
+							Upravit
 						</a>
 					</div>					
 				</div>
 				<hr>
 				<div>
-					Tags:
+					Štítky:
 					<div class="tags_current">
 						<br>
 						{{tag_str}}
 					</div>
 					<div class="tags_current">
 						<a href="/obj/tags/{{obj_id}}">
-							Edit
+							Upravit
 						</a>
 					</div>
 				</div>
 				<hr>
 			{% elif obj_type == 'link' %}
 				<div>
-					Type: 
-					Link
+					Typ: 
+					Odkaz
 				</div>
 				<hr>
 				<div>
-					Description:
+					Popis:
 					<div class="description_current">
 						<br>
 						{{description}}
@@ -240,43 +240,43 @@
 						<br>
 						<span class="description_cancel">
 							<a href="#">
-								Cancel
+								Zrušit
 							</a>
 						</span>
 					</div>
 					<div class="description_current">
 						<a href="#">
-							Edit
+							Upravit
 						</a>
 					</div>					
 				</div>
 				<hr>
 				<div>
-					Tags:
+					Štítky:
 					<div class="tags_current">
 						<br>
 						{{tag_str}}
 					</div>
 					<div class="tags_current">
 						<a href="/obj/tags/{{obj_id}}">
-							Edit
+							Upravit
 						</a>
 					</div>
 				</div>
 				<hr>
 			{% elif obj_type == 'tor' %}
 				<div>
-					Type: 
-					Link to torrent
+					Typ: 
+					Odkaz na Torrent
 				</div>
 				<hr>
 				<div>
-					Torrent link url:
+					Torrent url:
 					<a href="{{obj_link}}">{{obj_link}}</a>
 				</div>
 				<hr>
 				<div>
-					Description:
+					Popis:
 					<div class="description_current">
 						<br>
 						{{description}}
@@ -291,27 +291,27 @@
 						<br>
 						<span class="description_cancel">
 							<a href="#">
-								Cancel
+								Zrušit
 							</a>
 						</span>						
 					</div>
 					<div class="description_current">
 						<a href="#">
-							Edit
+							Upravit
 						</a>
 					</div>					
 
 				</div>
 				<hr>
 				<div>
-					Tags:
+					Štítky:
 					<div class="tags_current">
 						<br>
 						{{tag_str}}
 					</div>
 					<div class="tags_current">
 						<a href="/obj/tags/{{obj_id}}">
-							Edit
+							Upravit
 						</a>
 					</div>
 				</div>
@@ -319,12 +319,12 @@
 			{% else %}
 			<!-- obj_type == 'learn' or some later added type -->
 				<div>
-					Type: 
-					Learn
+					Typ: 
+					Lekce
 				</div>
 				<hr>
 				<div>
-					Description:
+					Popis:
 					<div class="description_current">
 						<br>
 						{{description}}
@@ -339,17 +339,17 @@
 						<br>
 						<span class="description_cancel">
 							<a href="#">
-								Cancel
+								Zrušit
 							</a>
 						</span>						
 					</div>
 					<div class="description_current">
-						<a href="#">Edit</a>
+						<a href="#">Upravit</a>
 					</div>										
 				</div>
 				<hr>
 				<div>
-					Tags:
+					Štítky:
 					<div class="tags_current">
 						<br>
 						{{tag_str}}
@@ -357,7 +357,7 @@
 
 					<div class="tags_current">
 						<a href="/obj/tags/{{obj_id}}">
-							Edit
+							Upravit
 						</a>
 					</div>
 				</div>
@@ -367,7 +367,7 @@
 
 	{% else %}
 		<h1>
-			This object has been deleted.
+			Tento objekt byl smazán.
 		</h1>
 	{% endif %}
 

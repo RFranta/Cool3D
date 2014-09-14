@@ -2,9 +2,10 @@
 <html>
 <head>
 	<title>
-		Bld3r | Print Shelf
+		Cool3D | Polička souborů k vytisknutí
 	</title>
-	<meta name="description" content="Bld3r.com is a 3D printing community for both beginners and enthusiasts. Maybe you have creations you want to share with others, or maybe you just want to learn how to do basic 3D modeling or find out which printer is right for you. We like to print in 3D, and we want to make it easier for everyone." />
+	<meta name="keywords" content="3D modely, 3D tisk, 3D , 3D tisk sociální síť, reprap, fabrication STL, soubory k 3D tisku, gcode, open source, obj" />	
+	<meta name="description" content="Cool3d.cz je stránka pro milovníky 3D tisku. Můžeš zde stahovat či sdílet 3D modely k vytisknutí nebo se podívat na novinky a lekce ze světa 3D tisku" />
 	<meta property="og:image" content="http://www.bld3r.com/img/bld3r_cover.png" />		
 	{% include "scripts.html" %}
 
@@ -66,7 +67,7 @@
 					<div style="width:700px; height:100px;">	
 						{{the_user.username}} 's
 						<br>														
-							Printshelf
+							Polička souborů k vytisknutí
 					</div>									
 				</div>		  	
 				<div style="padding-top:10px;clear:both;">
@@ -77,7 +78,7 @@
 				<div class="{{the_user.key().id()}}" id="printshelf_id" style="display:none;">
 				</div>
 				<div class="to_print">
-					To print
+					K tisknutí
 					<hr>
 					<br>
 					{% if to_print_list_exists %}
@@ -99,36 +100,36 @@
 											<div class="printshelf_edit_{{obj.key().id()}}" style="display:none;color:#999;">
 												<br>
 												<span class="printshelf_edit_button_{{obj.key().id()}}" style="cursor:pointer;">
-													edit
+													Upravit
 												</span>
 												&nbsp;
 												<span class="printshelf_remove_{{obj.key().id()}}" style="cursor:pointer;">
-													remove
+													Odstranit
 												</span>
 											</div>
 											<div class="move_to_has_printed_{{obj.key().id()}}" style="display:none;">
 												<br>
 												<span class="move_check_{{obj.key().id()}}" style="cursor:pointer;color:red;">
-													move to printed list
+													Přesunout do vytisknutých
 												</span>
 												&nbsp;
 												&nbsp;
 												<span class="cancel_check_{{obj.key().id()}}" style="cursor:pointer;">
-													cancel
+													Zrušit
 												</span>
 											</div>
 											<div class="remove_check{{obj.key().id()}}" style="display:none;">
 												<br>
-												Are you sure you want to remove {{obj.title}}?
+												Jste si jistý, že chcete vymazat {{obj.title}}?
 												<br>
 												<br>
 												<span class="yes_remove{{obj.key().id()}}" style="cursor:pointer;color:red;">
-													yes
+													Ano
 												</span>
 												&nbsp;
 												&nbsp;
 												<span class="cancel_remove{{obj.key().id()}}" style="cursor:pointer;">
-													cancel
+													Zrušit
 												</span>
 											</div>
 										</span>
@@ -139,18 +140,18 @@
 						</div>
 					{% else %}	
 						<div class="to_print_empty">
-							There doesn't seem to be anything here.
+							Žádný soubor.
 						</div>
 						<div class="to_print_list">
 						</div>
 					{% endif %}	
 				</div>
 				<div class="has_printed">
-					Printed
+					Vytisknuto.
 					<hr>
 					<br>
 					<div class="return_to_rate" style="color:red;display:none;">
-						Please take a moment to rate this object.
+						Věnujte svůj čas ohodnocení tohoto objektu.
 					</div>
 					{% if has_printed_list_exists %}
 						<div class="has_printed_empty">
@@ -171,36 +172,36 @@
 											<div class="printshelf_edit_{{obj.key().id()}}" style="display:none;color:#999;">
 												<br>
 												<span class="printshelf_edit_button_{{obj.key().id()}}" style="cursor:pointer;">
-													edit
+													Upravit
 												</span>
 												&nbsp;
 												<span class="printshelf_remove_{{obj.key().id()}}" style="cursor:pointer;">
-													remove
+													Odstranit
 												</span>
 											</div>
 											<div class="move_to_has_printed_{{obj.key().id()}}" style="display:none;">
 												<br>
 												<span class="move_check_{{obj.key().id()}}" style="cursor:pointer;color:red;">
-													move to "to print" list
+													Přesunout do seznamu "K vytisknutí" 
 												</span>
 												&nbsp;
 												&nbsp;
 												<span class="cancel_check_{{obj.key().id()}}" style="cursor:pointer;">
-													cancel
+													Zrušit
 												</span>
 											</div>
 											<div class="remove_check{{obj.key().id()}}" style="display:none;">
 												<br>
-												Are you sure you want to remove {{obj.title}}?
+												Jste si jistý, že chcete vymazat {{obj.title}}?
 												<br>
 												<br>
 												<span class="yes_remove{{obj.key().id()}}" style="cursor:pointer;color:red;">
-													yes
+													Ano
 												</span>
 												&nbsp;
 												&nbsp;
 												<span class="cancel_remove{{obj.key().id()}}" style="cursor:pointer;">
-													cancel
+													Zrušit
 												</span>
 											</div>
 										</span>
@@ -211,14 +212,14 @@
 						</div>
 					{% else %}	
 						<div class="has_printed_empty">
-							There doesn't seem to be anything here.
+							Žádný soubor.
 						</div>
 						<div class="has_printed_list">
 						</div>
 					{% endif %}	
 				</div>
 			{% else %}
-				User no longer exists.
+				Uživatel neexistuje.
 			{% endif %}
 		</div>
 	</div>

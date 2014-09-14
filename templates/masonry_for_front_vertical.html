@@ -128,14 +128,14 @@
 				<span>
 				<br>
 				{% if object.learn_skill %}
-					Skill level: {{object.learn_skill}}
+					Úroveň schopností: {{object.learn_skill}}
 					<br>
 				{% endif %}
 				<a href="/obj/{{object.id}}">
 					{% if object.obj_type == 'ask' %}
-						answers {{object.num_comments}}
+						Odpovědi {{object.num_comments}}
 					{% else %}
-						comments {{object.num_comments}}
+						Komentáře {{object.num_comments}}
 					{% endif %}
 				</a>
 				<span>
@@ -168,7 +168,7 @@
 		background:white;
 		border-radius:5px;
 		">
-		end of content
+		Konec obsahu
 	</div>
 {% else %}
 	<div style="
@@ -184,7 +184,7 @@
 		border-radius:	5px;
 		">
 		<a href="{{cursor_url}}{{cursor}}">
-			Next Page
+			Další stránka
 		</a>
 	</div>
 {% endif %}

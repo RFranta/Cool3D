@@ -2,10 +2,11 @@
 <html>
 <head>
 	<title>
-		Bld3r | {{the_user.username}}
+		Cool3D | {{the_user.username}}
 	</title>
-	<meta name="description" content="Bld3r.com is a 3D printing community for both beginners and enthusiasts. Maybe you have creations you want to share with others, or maybe you just want to learn how to do basic 3D modeling or find out which printer is right for you. We like to print in 3D, and we want to make it easier for everyone." />
-	<meta property="og:image" content="http://www.bld3r.com/img/bld3r_cover.png" />		
+	<meta name="keywords" content="3D modely, 3D tisk, 3D , 3D tisk sociální síť, reprap, fabrication STL, soubory k 3D tisku, gcode, open source, obj" />	
+	<meta name="description" content="Cool3d.cz je stránka pro milovníky 3D tisku. Můžeš zde stahovat či sdílet 3D modely k vytisknutí nebo se podívat na novinky a lekce ze světa 3D tisku" />
+	<meta property="og:image" content="http://www.bld3r.com/img/bld3r_cover.png" />			
 	<link type="text/css" rel="stylesheet" href="/css/masonry.css" />
 	{% include "scripts.html" %}
 </head>
@@ -154,7 +155,7 @@
 				{{the_user.username}}
 			</div>
 			<div style=" clear:left; color:#999; margin-left:20px;position:relative;top:-4px">
-				user for {{user_since}}
+				Uživatel po dobu {{user_since}}
 			</div>
 
 			<div class="img" style="max-width:500px; float:left;">
@@ -170,7 +171,7 @@
 								border: solid 1px #999;
 								padding: 5px;
 								">
-								Would you like to change or delete this image?
+								Chcete změnit nebo vymazat tento obrázek?
 								<br>
 								<form method="post" action="{{photo_upload_url}}" enctype="multipart/form-data">
 									<span style="
@@ -179,7 +180,7 @@
 										morgin-top: 5px;
 										">
 										<input type="file" name="img" value="{{img_file}}">
-										delete and change image
+										Vymazat a změnit obrázek
 									</span>
 									<div style="
 										float: left;
@@ -192,7 +193,7 @@
 										margin-top: 5px;
 										">
 										<input type="checkbox" name="delete" value="delete">
-										only delete
+										Pouze vymazat
 									</span>
 									<input type="hidden" name="verify" value="{{user_hash}}">
 									<input type="submit" value="submit" style="float:right;">
@@ -212,7 +213,7 @@
 								background:#fafafa; 
 								text-align:center;
 								float:left;">
-								Would you like to upload an image of yourself?
+								Chtěl byste přidat svůj obrázek?
 								<br>
 								<br>
 								<form method="post" action="{{photo_upload_url}}" enctype="multipart/form-data">
@@ -247,7 +248,7 @@
 			<span style="float:right;">
 				<span style="float:left;">
 					<a href="/user/printshelf/{{userpage_id}}" style="color:#0077cc;;">
-						{{the_user.username}}'s printshelf
+						{{the_user.username}}'s polička
 					</a>
 					&nbsp;
 				</span>
@@ -258,7 +259,7 @@
 						<span class="mailbox" style="float:left; text-align:center;">
 							<a href="/user/messages/{{user_id}}">
 								<span>
-									| my messages
+									| mé zprávy
 								</span>
 							</a>
 						</span>
@@ -266,7 +267,7 @@
 						<span style="float:left; text-align:center;">
 							<a href="/user/edit/{{user_id}}">
 								<span style="float:left; color:#4a6b82;; margin-left:5px;">
-									| edit account
+									| upravit účet
 								</span>
 							</a>
 						</span>
@@ -282,21 +283,21 @@
 						{% endif %}
 						>
 						<div class="{{the_user.key().id()}}" id="block_toggle">
-							| block
+							| blokovat
 						</div>
 						<br>
 						<div class="check_block">
-							are you sure?
+							Jste si jistý0?
 							<br>
 
 							<span class="yes_block" style="cursor:pointer;">
-								Yes
+								Ano
 							</span>
 							&nbsp;
 							&nbsp;
 							&nbsp;
 							<span class="cancel_block" style="cursor:pointer;">
-								Cancel
+								Zrušit
 							</span>
 						</div>
 					</div>
@@ -309,21 +310,21 @@
 						{% endif %}
 						>
 						<div class="{{the_user.key().id()}}" id="unblock_toggle">
-							| unblock 
+							| odblokovat
 						</div>
 						<br>
 						<div class="check_unblock">
-							are you sure?
+							Jste si jistý?
 							<br>
 
 							<span class="yes_unblock" style="cursor:pointer;">
-								Yes
+								Ano
 							</span>
 							&nbsp;
 							&nbsp;
 							&nbsp;
 							<span class="cancel_unblock" style="cursor:pointer;">
-								Cancel
+								Zrušit
 							</span>
 						</div>
 					</div>
@@ -337,21 +338,21 @@
 						{% endif %}
 						>
 						<div class="{{the_user.key().id()}}" id="follow_toggle">
-							| follow 
+							| Sledovat 
 						</div>
 						<br>
 						<div class="check_follow">
-							are you sure?
+							Jste si jistý?
 							<br>
 
 							<span class="yes_follow" style="cursor:pointer;">
-								Yes
+								Ano
 							</span>
 							&nbsp;
 							&nbsp;
 							&nbsp;
 							<span class="cancel_follow" style="cursor:pointer;">
-								Cancel
+								Zrušit
 							</span>
 						</div>
 					</div>
@@ -364,21 +365,21 @@
 						{% endif %}
 						>
 						<div class="{{the_user.key().id()}}" id="unfollow_toggle">
-							| unfollow
+							| přestat sledovat
 						</div>
 						<br>
 						<div class="check_unfollow">
-							are you sure?
+							Jste si jistý?
 							<br>
 
 							<span class="yes_unfollow" style="cursor:pointer;">
-								Yes
+								Ano
 							</span>
 							&nbsp;
 							&nbsp;
 							&nbsp;
 							<span class="cancel_unfollow" style="cursor:pointer;">
-								Cancel
+								Zrušit
 							</span>
 						</div>
 					</div>
@@ -395,27 +396,27 @@
 			float:left;">
 
 			<div class="rep" style="text-align:center; width:100px; float:left;">
-				Rate
+				Hodnocení
 				<br>
-				Reputation
+				Prestiž
 				<br>
 				<span style="font-size: 40px; color:#0077cc;">
 					{{the_user.rate_rep}}			
 				</span>		
 			</div>	
 			<div class="rep" style="text-align:center; width:100px; float:left;">
-				Object
+				Objekt
 				<br>
-				Reputation
+				Prestiž
 				<br>
 				<span style="font-size: 40px; color:#0077cc;">
 					{{the_user.obj_rep}}			
 				</span>		
 			</div>
 			<div class="rep" style="text-align:center; width:100px; float:left;">
-				Comment
+				Komentáře
 				<br>
-				Reputation
+				Prestiž
 				<br>
 				<span style="font-size: 40px; color:#0077cc;">
 					{{the_user.com_rep}}			
@@ -504,7 +505,7 @@
 					</tr>
 					<tr>
 						<td class="user_info">
-							Location 
+							Lokace 
 						</td>
 						<td>
 							{{the_user.location}}
@@ -512,7 +513,7 @@
 					</tr>
 					<tr>
 						<td class="user_info">
-							Printer
+							Tiskárny
 						</td>
 						<td>
 							{{the_user.printer}}
@@ -528,7 +529,7 @@
 					</tr>
 					<tr>
 						<td class="user_info">
-							Modeling software
+							Modelovací software
 						</td>
 						<td>
 							{{the_user.software}}
@@ -538,7 +539,7 @@
 				<br>
 				{% if the_user.awards %}
 					<div class="awards">
-						Awards
+						Ceny
 						<hr>
 						{% for award in the_user.awards %}
 							{% if award == "email" %}
@@ -577,7 +578,7 @@
 								border-radius: 3px;
 								text-decoration: none;
 							">
-								Message {{the_user.username}}
+								Zprávy {{the_user.username}}
 							</span>
 						</span>
 						<br>
@@ -598,7 +599,7 @@
 		<br>
 		<br>
 		<div>
-		History
+		Historie
 		<br>
 		<hr>
 		<br>
@@ -622,7 +623,7 @@
 				background:white;
 				border-radius:5px;
 				">
-				end of content
+				Konec obsahu
 			</div>
 		{% else %}
 			<div style="
@@ -636,13 +637,13 @@
 				background:white;
 				border-radius:5px;">
 				<a href="/user/{{userpage_id}}/page/{{next_page_num}}">
-					Next Page
+					Další stránka
 				</a>
 			</div>
 		{% endif %}
 	{% else %}
 		<h1>
-			This user has been deleted.
+			Tento uživatel byl vymazán.
 		</h1>
 	{% endif %}
 	</div>

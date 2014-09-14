@@ -3,9 +3,10 @@
 <head>
 	
 	<title>
-		Bld3r Submit Torrent Link Step 1
+		Cool3D Nahrání Torrent odkazu krok 1
 	</title>
-	<meta name="description" content="Bld3r.com is a 3D printing community for both beginners and enthusiasts. Maybe you have creations you want to share with others, or maybe you just want to learn how to do basic 3D modeling or find out which printer is right for you. We like to print in 3D, and we want to make it easier for everyone." />
+	<meta name="keywords" content="3D modely, 3D tisk, 3D , 3D tisk sociální síť, reprap, fabrication STL, soubory k 3D tisku, gcode, open source, obj" />	
+	<meta name="description" content="Cool3d.cz je stránka pro milovníky 3D tisku. Můžeš zde stahovat či sdílet 3D modely k vytisknutí nebo se podívat na novinky a lekce ze světa 3D tisku" />
 	<meta property="og:image" content="http://www.bld3r.com/img/bld3r_cover.png" />			
 </head>
 <style>
@@ -87,9 +88,9 @@
 			<div class="top" style="width:1000px; margin-top:20px;">
 				<img src="/img/tor.ico" width="100" height="auto" />
 				<span>
-					Step 1 of 2:
+					Krok 1 z 2:
 					<br>
-					Submit a torrent link
+					Potvrďte odkaz Torrent 
 				</span>
 			</div>
 
@@ -102,7 +103,7 @@
 					<table>
 						<tr>
 							<td>
-								Title
+								Název
 							</td>
 							<td>
 								<input class="title" type="text" name="title" value="{{title}}" style="font-size:30px;">
@@ -110,7 +111,7 @@
 						</tr>		
 						<tr>
 							<td>
-								Torrent Link							
+								Odkaz na Torrent							
 							</td>
 							<td>
 								<input class="link" type="text" name="link" value="{{link}}">
@@ -124,27 +125,27 @@
 						{% if over18 == True %}
 						<tr>
 							<td>
-							Audience
+							Určeno pro
 							</td>
 							<td>
-							<input type="radio" name="audience" value="kids" {% if audience == "kids" %}checked{% endif %}> okay for everyone<br>
-							<input type="radio" name="audience" value="sfw" {% if audience == "sfw" %}checked{% endif %}> sfw, but not okay for kids<br>
-							<input type="radio" name="audience" value="nsfw" {% if audience == "nsfw" %}checked{% endif %}> nsfw, but not dangerous (no weapons!) 
+							<input type="radio" name="audience" value="kids" {% if audience == "kids" %}checked{% endif %}> vhodné por každého<br>
+							<input type="radio" name="audience" value="sfw" {% if audience == "sfw" %}checked{% endif %}> nevhodné pro děti<br>
+							
 							</td>
 						</tr>
 						{% endif %}								
 						<tr>
 							<td>
-								Safety
+								Bezpečí
 							</td>
 							<td>
 								<input type="checkbox" name="food_related" value="True" {% if food_related == True %}checked{% endif %}>
-								Check if food/drink related	
+								Zaškrtněte, pokud souvisí s jídlem či pitím
 							</td>
 						</tr>	
 						<tr>
 							<td>
-								Description
+								Popis
 							</td>
 							<td>
 								<textarea name="description">{{description}}</textarea>
@@ -152,7 +153,7 @@
 						</tr>		
 						<tr>
 							<td>
-								Tags
+								Štítky
 							</td>
 							<td>
 								<input class="tag_input"  type="text" name="tags" value="{{tags}}">
@@ -166,7 +167,7 @@
 						float:left; 
 						clear:left;
 						">
-						<input type="submit" value="Submit" style="
+						<input type="submit" value="Potvrdit" style="
 							width:200px;
 							height:30px;
 							padding: 0.3em 0.6em;
@@ -183,34 +184,32 @@
 			</div>
 			<div style="float:left; margin-top:5px; margin-bottom:5px; margin-left:50px; width:260px; height: 470px; border-radius: 5px; padding:40px; padding-top:10px; padding-bottom:5px; background:#FFEFC6; color:#735005;">
 				<span style="font-size:30px; color:#d45e6a;">
-					How to Link
+					Jak uložit odkaz
 				</span>
 				<br>
 				<span style="font-size:12px; color:#999;">
-					Link torrents freely and responsibly
+					
 				</span>
 				<br>
-				<br>
+				
 				<span style="font-size:14px;">
-					The link must be freely available. Any link to models for sale will be removed.
+					Jakýkoliv odkaz musí být volně ke stažení, odkazy na placené stránky budou odstraněny.
 					<br>
 					<br>
-					Categorize prints for the right audience. 
+					Vyberte vhodné štítky.
 					<br>
 					<br>
-					Weapons and dangerous prints are prohibited.
+					Zbraně jsou zakázány.
+					
 					<br>
 					<br>
-					Alert users if the prints will contact food or drink. Such prints may not be safe. 
+					Popisy i štítky jsou<span style="font-weight:bold;"> volitelné</span>, ale doporučujeme je.
 					<br>
 					<br>
-					Descriptions and tags are <span style="font-weight:bold;">optional</span>, but strongly encouraged (+ reputation points). You can edit later.
+					Štítky oddělujte čárkami.
 					<br>
 					<br>
-					Separate tags with commas.
-					<br>
-					<br>
-					Misleading information is frowned upon.
+					
 				</span>
 			</div>
 

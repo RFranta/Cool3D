@@ -3,7 +3,7 @@
 <head>
 	
 	<title>
-		Bld3r | {{the_obj.title}}
+		Cool3D | {{the_obj.title}}
 	</title>
 	<meta name="description" content="{{the_obj.description}}" />
 	<meta property="og:image" content="{{img1}}" />		
@@ -229,12 +229,6 @@
 		padding-top: 100px;
 		background: #fafafa;	
 		text-align: center;
-	}
-	.secondary_data_file {
-		float:right;
-		margin-right: 20px;
-		margin-bottom: 10px;
-		clear:both;
 	}
 	.data1 {
 		float:left;
@@ -928,11 +922,11 @@
 								</span>
 							{% elif voted == -1 %}
 								<span class= "{{obj_id}}" id="voteup2" >
-									<span class='voteup' id="vu{{obj_id}}" title="This object is awesome! Upvote so others can see it. (Click again to undo.)">▲</span>
+									<span class='voteup' id="vu{{obj_id}}" title="To se mi líbí! Hlasujte ať ostatní tento objekt dřve najdou">▲</span>
 								</span>
 							{% else %}
 								<span class= "{{obj_id}}" id="voteup" >
-									<span class='voteup' id="vu{{obj_id}}" title="This object is awesome! Upvote so others can see it. (Click again to undo.)">▲</span>
+									<span class='voteup' id="vu{{obj_id}}" title="To se mi líbí! Hlasujte ať ostatní tento objekt dřve najdou">▲</span>
 								</span>
 							{% endif %}
 						</span>
@@ -946,18 +940,18 @@
 								<span class= "{{obj_id}}" id="voteddown" >
 								  	<span class='votedown' id="vd{{obj_id}}"  style="
 								  		color:#d45e6a;
-										text-shadow: -1px 0 #ddd, 0 1px #ddd, 1px 0 #ddd, 0 -1px #ddd;" title="You downvoted this object. (Click to undo.)"
+										text-shadow: -1px 0 #ddd, 0 1px #ddd, 1px 0 #ddd, 0 -1px #ddd;" title="Hlasoval jste proti tomuto objektu"
 										>
 										▼
 									</span>
 								</span>
 							{% elif voted == 1 %}
 								<span class= "{{obj_id}}" id="votedown2" >
-								  	<span class='votedown' id="vd{{obj_id}}" title="Downvote so others won't see it. (Click again to undo.)">▼</span>
+								  	<span class='votedown' id="vd{{obj_id}}" title="Hlasovat proti tomuto objektu">▼</span>
 								</span>
 							{% else %}
 							  <span class= "{{obj_id}}" id="votedown" >
-							  	<span class='votedown' id="vd{{obj_id}}" title="Downvote so others won't see it. (Click again to undo.)">▼</span>
+							  	<span class='votedown' id="vd{{obj_id}}" title="Hlasovat proti tomuto objektu">▼</span>
 							  </span>	
 							{% endif %} 
 						</span>
@@ -966,7 +960,7 @@
 					<div class="votebox" style="color:#999;">
 						▲
 						<br>
-						<span style="color:black;" title="Score">
+						<span style="color:black;" title="Sköre">
 							&nbsp;{{votesum}}
 						</span>
 						<br>
@@ -1008,7 +1002,7 @@
 										{% endif %}
 									</span>
 								{% elif the_obj.printable == True %}
-									<span title="You can rate objects after you have selected 'I've printed this' on your prinshelf." class="rating_area">
+									<span title="Můžete hodnotit objekt poté co ho přidáte do vytisknutých souborů." class="rating_area">
 										{% if (rate_avg >= 1) and (rate_avg < 1.5) %}
 											{% include "rate1_unprinted.html" %}
 										{% elif (rate_avg >= 1.5) and (rate_avg < 2.5) %}
@@ -1025,7 +1019,7 @@
 									</span>
 								{% endif %}
 								<div class="refresh_to_rate">
-									Refresh page to rate print quality.
+									Aktualizujte stránku, abyste mohli ohodnotit kvalitu tisku..
 								</div>
 							</div>
 						</div>
@@ -1059,13 +1053,13 @@
 								</div>
 							{% else %}
 								<div class="no_img">
-									No image :(
+									Bez obrázku :(
 									<br>
 									<br>
 									{% if obj_type == 'upload' %}
 										{% if not show_3d_model %}
-											<a href="/obj/{{obj_id}}?webgl=True" title="Larger objects might take a while">
-												<span style="text-decoration:none; text-align:center; font-size:10px;"><img src="/img/glassestiny.png" width="50px"/><br>View in 3D</span>
+											<a href="/obj/{{obj_id}}?webgl=True" title="Větší objekty mohou chvíli trvat">
+												<span style="text-decoration:none; text-align:center; font-size:10px;"><img src="/img/glassestiny.png" width="50px"/><br>Vidět ve 3D</span>
 											</a>
 										{% endif%}
 									{% endif%}
@@ -1096,7 +1090,7 @@
 								<br>
 							</div>
 						{% endif %} 						
-						<div class='link' title="Go to the host of this object."  style="
+						<div class='link' title="Přejít na odkaz tohoto objektu."  style="
 							width:400px;
 							padding-left:15px;
 							">
@@ -1116,7 +1110,7 @@
 									</a>
 								</span>
 							{% else %}
-								<span class= "{{obj_id}}" id="flag" title="Report a violation of terms of service" style="
+								<span class= "{{obj_id}}" id="flag" title="Nahlásit porušení podmínek použití" style="
 									font-size:10px;
 									color: #0077cc;
 									cursor: pointer;
@@ -1127,7 +1121,7 @@
 										<img src="/img/flag.png" height="21px"/>
 										<span style="color:#ccc;">
 										<br>
-										Flag
+										
 										</span>
 									</a>
 								</span>
@@ -1146,17 +1140,17 @@
 									">
 									<img src="/img/delete_pic.png" width="50px"/>
 									<br>									
-									delete picture
+									Vymazat obrázek
 								</span>
 								<div class="delete_img_box" >
 									<form method="post" action="/object_img_delete">
 
 										<span style="float:left; margin-right: 10px;">
-											<span style="vertical-align:text-top;">Delete this image?</span> 
+											<span style="vertical-align:text-top;">Vymazat tento obrázek?</span> 
 											<br>
 											<input type="checkbox" name="check" value="yes" style="float:left; margin-right: 5px; margin-top:3px;">
 											<span style="float:left; margin-right: 5px;">
-												Yes
+												Ano
 											</span> 
 											
 											<input type="hidden" name="obj_id" value="{{obj_id}}">
@@ -1178,7 +1172,7 @@
 									<span class="add_img" style="color:#ccc; font-size:10px; text-align:center;">
 										<img src="/img/add_pic.png" width="50px"/>
 										<br>
-										add picture
+										Přidat obrázek
 									</span>		
 								{% endif %}	
 							{% else %}	
@@ -1186,14 +1180,14 @@
 									<span class="add_img" style="color:#ccc; font-size:10px; text-align:center;">
 										<img src="/img/camera.png" width="50px"/>
 										<br>										
-										replace picture
+										Změnit obrázek
 									</span>	
 								{% endif %}								
 								{% if visitor_has_added_img == False %}
 									<span class="add_img" style="color:#ccc; font-size:10px; text-align:center;">
 										<img src="/img/add_pic.png" width="50px"/>
 										<br>										
-										add picture
+										Přidat obrázek
 									</span>	
 								{% endif %}
 							{% endif %}
@@ -1206,7 +1200,7 @@
 						{% if img_list_full == False %}
 							<div class="object_img_upload_form" style="float:left; width: 550px; clear:left; margin-left:100px;margin-bottom:10px;">
 								<div class="add_img_box">
-									Add an image
+									Přidat obrázek
 									<br>
 									<br>								
 									<form method="post" action="{{photo_upload_url}}" enctype="multipart/form-data">
@@ -1216,7 +1210,7 @@
 										<br>
 										<br>
 										<input type="checkbox" name="rights" value="yes"> 
-										Sharing this image complies with the <a href="/tos" target="_blank">terms of service</a>.
+										Sdílením tohoto obrázku souhlasíte s našimi <a href="/tos" target="_blank">podmínkami použití</a>.
 										<br>
 										<br>
 										<input type="submit" value="upload">
@@ -1228,7 +1222,7 @@
 						{% if visitor_has_added_img == True %}
 							<div class="visitor_img_upload_form" style="float:left; width: 550px; clear:left; margin-left:100px;margin-bottom:10px;">
 								<div class="add_img_box">
-									Replace your image
+									Změňte svůj obrázek
 									<br>
 									<br>								
 									<form method="post" action="{{visitor_upload_url}}" enctype="multipart/form-data">
@@ -1238,7 +1232,7 @@
 										<br>
 										<br>
 										<input type="checkbox" name="rights" value="yes"> 
-										Sharing this image complies with the <a href="/tos" target="_blank">terms of service</a>.
+										Sdílením tohoto obrázku souhlasíte s našimi  <a href="/tos" target="_blank">podmínkami použití</a>.
 										<br>
 										<br>
 										<input type="submit" value="upload">
@@ -1248,7 +1242,7 @@
 						{% else %}
 							<div class="visitor_img_upload_form" style="float:left; width: 550px; clear:left; margin-left:100px; margin-bottom:10px;">
 								<div class="add_img_box">
-									Add an image
+									Přidejte obrázek
 									<br>
 									<br>								
 									<form method="post" action="{{visitor_upload_url}}" enctype="multipart/form-data">
@@ -1258,7 +1252,7 @@
 										<br>
 										<br>
 										<input type="checkbox" name="rights" value="yes"> 
-										Sharing this image complies with the <a href="/tos" target="_blank">terms of service</a>.
+										Sdílením tohoto obrázku souhlasíte s našimi <a href="/tos" target="_blank">podmínkami použití</a>.
 										<br>
 										<br>
 										<input type="submit" value="upload">
@@ -1305,11 +1299,11 @@
 											<form method="post" action="/object_img_delete">
 
 												<span style="float:left; margin-right: 10px;">
-													<span style="vertical-align:text-top;">Delete this image?</span> 
+													<span style="vertical-align:text-top;">Vymazat tento obrázek?</span> 
 													<br>
 													<input type="checkbox" name="check" value="yes" style="float:left; margin-right: 5px; margin-top:3px;">
 													<span style="float:left; margin-right: 5px;">
-														Yes
+														Ano
 													</span> 
 													
 													<input type="hidden" name="obj_id" value="{{obj_id}}">
@@ -1340,7 +1334,7 @@
 									<a href="#{{the_quad[2]}}"><img  src="{{the_quad[2]}}" width="120"/></a>
 									<br>
 									<span style="float:left;">
-										by 
+										Autor 
 										<a href="/user/{{the_quad[0]}}">
 											{{the_quad[1]}}
 										</a>
@@ -1350,7 +1344,7 @@
 										<!--user upload this photo-->
 										<span class="delete_visitor_img" id="delete_visitor_img_{{ loop.index }}" style="cursor: pointer; float:right; color:#ddd; font-size: 10px;">
 											<br>
-											delete
+											Vymazat
 										</span>
 
 										<!-- loop index is the position in the list of items to create unique ids -->
@@ -1364,7 +1358,7 @@
 
 												<input type="checkbox" name="check" value="yes">
 												<span style="color: red;">
-													&nbsp;Confirm
+													&nbsp;Potvrdit
 												</span>
 												<br>
 												<br>
@@ -1398,8 +1392,8 @@
 											<td style="padding-top:13px; padding-right:20px; padding-left:12px;">
 												<span class='data1' style="text-align:center;">
 														{% if not show_3d_model %}							
-															<a href="/obj/{{obj_id}}?webgl=True" title="Larger objects might take a while" style="text-decoration:none;">
-																<span style="font-size:10px; color:#444;"><img src="/img/glassestiny.png" height="30px"/><br>View in 3D</span>
+															<a href="/obj/{{obj_id}}?webgl=True" title="Větší objekty mohou chvíli trvat" style="text-decoration:none;">
+																<span style="font-size:10px; color:#444;"><img src="/img/glassestiny.png" height="30px"/><br>Vidět ve 3D</span>
 															</a>
 														{% endif %}
 												</span>												
@@ -1411,7 +1405,7 @@
 															<img src="/img/print_shelf.png" height="30px"/>
 															<br>
 															<span style="font-size:10px; color:#444;">
-																Printshelf
+																Polička 3D souborů k tisknutí
 															</span>
 														</span> <!-- the problem with expaning is the inline block quality of printshelf i think -->
 														<div class="printshelf_select">
@@ -1419,20 +1413,20 @@
 																<span style="font-size: 18px;">
 																	&#9786;
 																</span> 
-																&nbsp;&nbsp;I want to print this
+																&nbsp;&nbsp;Chci toto vytisknout
 															</div>
 															<div class="printed">
 																<span style="font-size: 18px;">
 																	&#10003; 
 																</span>
-																&nbsp;&nbsp;I've printed this
+																&nbsp;&nbsp;Toto jsem již vytisknul
 															</div>
 															<div class="gotoprintshelf">
 																<a href="/user/printshelf/{{user_id}}">
 																<span style="font-size: 18px;">
 																	&#9758; 
 																</span>
-																&nbsp;&nbsp;Go to my printshelf
+																&nbsp;&nbsp;Jít do mé poličky souborů k vytisknutí
 																</a>
 															</div>
 														</div>
@@ -1446,7 +1440,7 @@
 														id="download_button" 
 														type="button" 
 														onClick="window.location.href='{{the_obj.stl_file_link}}'" 
-														value="Download" 
+														value="Stáhnout" 
 														style="
 														float:left;
 														margin-top:-5px;
@@ -1472,7 +1466,7 @@
 								</span>
 
 								{% if the_obj.file_link_2 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input 
 												id="download_button" 
@@ -1496,7 +1490,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_3 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_3}}'" value="Download {{the_obj.file_blob_filename_3}}" style="
 												float:left;
@@ -1515,7 +1509,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_4 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_4}}'" value="Download {{the_obj.file_blob_filename_4}}" style="
 												float:left;
@@ -1534,7 +1528,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_5 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_5}}'" value="Download {{the_obj.file_blob_filename_5}}" style="
 												float:left;
@@ -1553,7 +1547,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_6 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_6}}'" value="Download {{the_obj.file_blob_filename_6}}" style="
 												float:left;
@@ -1572,7 +1566,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_7 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_7}}'" value="Download {{the_obj.file_blob_filename_7}}" style="
 												float:left;
@@ -1591,7 +1585,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_8 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_8}}'" value="Download {{the_obj.file_blob_filename_8}}" style="
 												float:left;
@@ -1610,7 +1604,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_9 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_9}}'" value="Download {{the_obj.file_blob_filename_9}}" style="
 												float:left;
@@ -1629,7 +1623,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_10 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_10}}'" value="Download {{the_obj.file_blob_filename_10}}" style="
 												float:left;
@@ -1648,7 +1642,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_11 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_11}}'" value="Download {{the_obj.file_blob_filename_11}}" style="
 												float:left;
@@ -1667,7 +1661,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_12 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_12}}'" value="Download {{the_obj.file_blob_filename_12}}" style="
 												float:left;
@@ -1686,7 +1680,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_13 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_13}}'" value="Download {{the_obj.file_blob_filename_13}}" style="
 												float:left;
@@ -1705,7 +1699,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_14 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_14}}'" value="Download {{the_obj.file_blob_filename_14}}" style="
 												float:left;
@@ -1724,7 +1718,7 @@
 									</span>
 								{% endif %}
 								{% if the_obj.file_link_15 %}
-									<span class='secondary_data_file'>
+									<span class='data1'>
 										<form>
 											<input id="download_button" type="button" onClick="window.location.href='{{the_obj.file_link_15}}'" value="Download {{the_obj.file_blob_filename_15}}" style="
 												float:left;
@@ -1757,7 +1751,7 @@
 														<img src="/img/print_shelf.png" height="30px"/>
 														<br>
 														<span style="font-size:10px; color:#444;">
-															Printshelf
+															Polička 3D souborů k vytisknutí
 														</span>
 													</span> <!-- the problem with expaning is the inline block quality of printshelf i think -->
 													<div class="printshelf_select">
@@ -1765,20 +1759,20 @@
 															<span style="font-size: 18px;">
 																&#9786;
 															</span> 
-															&nbsp;&nbsp;I want to print this
+															&nbsp;&nbsp;Chci toto vytisknout
 														</div>
 														<div class="printed">
 															<span style="font-size: 18px;" title="">
 																&#10003; 
 															</span>
-															&nbsp;&nbsp;I've printed this
+															&nbsp;&nbsp;Toto jsem již vytisknul
 														</div>
 														<div class="gotoprintshelf">
 															<a href="/user/printshelf/{{user_id}}">
 															<span style="font-size: 18px;">
 																&#9758; 
 															</span>
-															&nbsp;&nbsp;Go to my printshelf
+															&nbsp;&nbsp;Jít do mé poličky 3D souborů k tisknutí
 															</a>
 														</div>
 													</div>
@@ -1800,11 +1794,11 @@
 														border-radius: 3px;
 														text-decoration: none;
 													">
-														&#10149; &nbsp; Link											
+														&#10149; &nbsp; Odkaz											
 												</span>
 												<br>
 												<span style="font-size:10px; color:#444;">
-													Go to this object's host
+													Přejít na umístění tohoto objektu
 												</span>												
 											</a>
 										</td>
@@ -1814,9 +1808,9 @@
 						</div>
 
 						<div class="refresh_info">
-							This object has been added to your 
+							Tento objekt byl přidán do Vaší
 							<a href="/user/printshelf/{{user_id}}">
-								printshelf
+								poličky
 							</a>.
 						</div>
 
@@ -1825,11 +1819,11 @@
 									{% if user_is_author %}
 										{% if the_obj.obj_type == "upload" %}
 											<div style="width: 230px;float:left;">
-												Edit Info, Add File, or Delete
+												Upravit info, přidat soubor nebo ho vymazat
 											</div>
 										{% else %}
 										<div style="width: 150px; float:left; margin-left:80px;">
-												Edit Info or Delete
+												Info 
 											</div>
 										{% endif %}
 									{% else %}
@@ -1840,7 +1834,7 @@
 									
 									{% if user %}
 										{% if user_is_author == True and the_obj.obj_type != "ask"%}
-											<div class="open_info_edit_slide" title="Edit info">
+											<div class="open_info_edit_slide" title="Upravit info">
 												&#9998;
 											</div>
 										{% endif %}
@@ -1851,26 +1845,26 @@
 									{% if user %}
 										{% if user_is_author == True %}
 											<span class="open_description_edit_slide">
-												Edit
+												Upravit
 											</span>
 											{% if the_obj.obj_type == "upload" %}
 												{% if not file_list_full %}
 													<a href="/altfile/{{obj_id}}">
 														<span class="other_file_upload_link_slide">
-															Add a file
+															Přidat soubor
 														</span>
 													</a>
 												{% else %}
 													<a href="/altfile/{{obj_id}}">
 														<span class="other_file_upload_link_slide" style="color:black;">
-															Remove a file
+															Vymazat soubor
 														</span>
 													</a>
 												{% endif %}
 											{% endif %}
 											<span class="delete_object_slide">
 												<a href="/obj/del/{{obj_id}}">
-													Delete object
+													Vymazat objekt
 												</a>
 											</span>		
 										{% endif %}
@@ -1895,9 +1889,9 @@
 									font-size:14px;
 									">
 									{% if obj_type == 'upload' %}
-										uploaded by
+										Uloženo
 									{% else %}
-										submitted by
+										Potvrzeno
 									{% endif %}
 									<a href="/user/{{author_id}}">
 										<span style="color:#0077cc;">
@@ -1913,7 +1907,7 @@
 										</span>
 									</a>
 									<br>
-									{{time_since_made}} ago
+									před {{time_since_made}} 
 									<br>
 									{% if obj_type == 'upload' %}
 										<br>
@@ -1928,7 +1922,7 @@
 											width:300px;
 											">										
 											<span style="color:black; font-weight:bold;">
-												License
+												Licence
 											</span>
 											<br>
 											<br>
@@ -1989,7 +1983,7 @@
 											">
 											<span class="description_text_holder">
 												<div style="font-weight:bold; text-align: center;">
-													Description
+													Popis
 												</div>
 												<br>
 												<div style="text-align: justify;">
@@ -1999,9 +1993,9 @@
 														<!-- note: this section should be removed eventually -->
 														<span style="font-size: 8px;">
 															<hr>
-															Admin note, this description has not been updated since we added markdown.
+															
 															<br>
-															To update, simply edit the text with at least one change.
+															K aktualizaci stačí přidat malou změnu a uložit ji
 															<hr>
 														</span>  
 														<br>
@@ -2019,7 +2013,7 @@
 											padding: 15px;
 											color: #999;
 											">
-											description below
+											Popis níže:
 										</span>
 									{% endif %}
 								{% endif %}
@@ -2034,7 +2028,7 @@
 										padding: 15px;
 										width:300px;	
 										">
-										Description: &nbsp;
+										Popis: &nbsp;
 										<span class="description_text_holder">
 										</span>						
 									</span>
@@ -2056,11 +2050,11 @@
 														<span class="description_submit">
 															<br>
 															<span class="submit_edits">
-																Submit edits
+																Potvrdit úpravu
 															</span>
 														</span>
 														<span class="cancel_description_submit">
-															Cancel
+															Zrušit
 														</span>															
 													</form>
 	
@@ -2077,7 +2071,7 @@
 						{% if printed_by_list %}
 							<div class="printed_by_list">
 								<div class="printed_by_header">
-									Printed by
+									Vytisknuto
 								</div>
 								{% for a_user in printed_by_list %}
 									<div class="printed_by_list_item">
@@ -2099,10 +2093,10 @@
 							<div class = "tag_box">					
 								<div class = "tag_box_header">
 									<div style="width: 130px; float:left; margin-left:100px">
-										Tags
+										Štítky
 									</div>
 									{% if user %}
-										<div class="open_tags_edit" title="Add/edit tags">
+										<div class="open_tags_edit" title="Přidat/upravit štítky">
 											&#9998;
 										</div>
 									{% endif %}											
@@ -2125,7 +2119,7 @@
 									<span class="refresh_to_see_tags_edit" style="
 										display:none;
 										color: red;">
-										refresh to see updated tag list
+										Pro aktualizaci štítků aktualizujte stránky
 									</span>
 
 									{% if user %}
@@ -2136,13 +2130,13 @@
 												<hr>
 												{% if user_is_author == True %}
 													<br>
-													<span title="Other users cannot edit these" style="clear:left;">Author tags</span>
+													<span title="Other users cannot edit these" style="clear:left;">Vlastní štítky</span>
 													<br>
 													<input type="text" name='author_tags' value='{{author_tag_str}}' id="author_tag_edit_tags" style="font-size: 16px; width:270px; padding-top:5px; padding-bottom:5px;">
 													<br>
 													<br>
 												{% endif %}
-												<span title="Anyone can edit these">Public tags</span>
+												<span title="Tyto štítky může upravit kdokoliv">Veřejné štítky</span>
 												<br>
 												<input type="text" name='public_tags' value='{{public_tag_str}}' id="public_tag_edit_tags" style="font-size: 16px; width:270px; padding-top:5px; padding-bottom:5px;">
 												<br>
@@ -2154,11 +2148,11 @@
 												<input type="hidden" name="user_id" value="{{user_id}}" id="user_id_input">
 												
 
-												<span class="tag_submit" title="Separate tags with commas">
-													Submit edits
+												<span class="tag_submit" title="Štítky oddělujte čárkami">
+													Potvrdit změnu
 												</span>
 												<span class="cancel_tag_submit">
-													Cancel
+													Zrušit
 												</span>
 												<br>
 												<br>
@@ -2169,29 +2163,29 @@
 								{% else %}
 									{% if user %}
 										<span class="tag_list" style="font-size:14px;">
-											Add some tags!
-											Help others find this object!
+											Přidejte štítky!
+											Pomozte ostatním najít tento objekt!
 										</span>
 										<span class="refresh_to_see_tags_edit" style="
 											display:none;
 											color: red;">
-											refresh to see updated tag list
+											Aktualizujte stránku pro shlédnut aktuálních štítků 
 										</span>
 
-										<div class="tags_edit" style="display:none;" title="Separate tags with commas">
+										<div class="tags_edit" style="display:none;" title="Štítky oddělujte čárkami">
 											<br>
 											<br>
 											<form method="post">
 												<hr>
 												{% if user_is_author == True %}
 													<br>
-													<span title="Other users cannot edit these">Author tags</span>
+													<span title="Ostatní uživatelé nemohou tyto štítky upravit">Autorovy štítky</span>
 													<br>
 													<input type="text" name='author_tags' value='{{author_tag_str}}' id="author_tag_edit_tags" style="font-size: 16px; width:270px; padding-top:5px; padding-bottom:5px;">
 													<br>
 													<br>
 												{% endif %}
-												<span title="Anyone can edit these">Public tags</span>
+												<span title="Tyto štítky mnůže upravit každý">Veřejné štítky</span>
 												<br>
 												<input type="text" name='public_tags' value='{{public_tag_str}}' id="public_tag_edit_tags" style="font-size: 16px; width:270px; padding-top:5px; padding-bottom:5px;">
 												<br>
@@ -2203,10 +2197,10 @@
 												<input type="hidden" name="user_id" value="{{user_id}}" id="user_id_input">
 												
 												<span class="tag_submit">
-													Submit edits
+													Potvrdit změny
 												</span>
 												<span class="cancel_tag_submit">
-													Cancel
+													Zrušit
 												</span>												<br>
 												<br>
 											</form>
@@ -2258,9 +2252,9 @@
 								<!-- note: this section should be removed eventually -->
 								<span style="font-size: 8px;">
 									<hr>
-									Admin note, this description has not been updated since we added markdown.
+									.
 									<br>
-									To update, simply edit the text with at least one change.
+									K aktualizaci stačí přidat pouze malou změnu a uložit ji
 									<hr>
 								</span>  
 								<br>
@@ -2271,11 +2265,11 @@
 						<br>
 						<br>
 						<span class="open_description_edit_slide" style="float:left; border-radius:4px; padding-left:5px; text-align: center;">
-							edit
+							Upravit
 						</span>	
 						<span class="delete_object_slide" style="width: 110px; float:right; border-radius:4px; padding-left:5px; text-align: center;">
 							<a href="/obj/del/{{obj_id}}">
-								delete question
+								Vymazat otázku
 							</a>
 						</span>										
 					</div>
@@ -2291,7 +2285,7 @@
 										<input type="hidden" name="verify" value="{{user_hash}}" id="description_verify">
 										<span class="description_submit">
 											<span class="submit_edits">
-												Submit edits
+												Potvrdit úpravy
 											</span>
 											<br>
 											<br>
@@ -2300,7 +2294,7 @@
 									<br>
 									<br>
 									<span class="cancel_description_submit" style="float:right;clear:left;cursor:pointer;color:red;">
-										cancel
+										Zrušit
 									</span>	
 								</div>
 							{% endif %}
@@ -2336,14 +2330,14 @@
 													float:left;
 													clear:left;
 													margin-right:15px">
-													Submit edits
+													Potvrdit změny
 												</span>
 											</span>
 										</form>
 										<br>
 										<br>
 										<span class="cancel_description_submit" style="float:right;clear:left;cursor:pointer;color:red;">
-											cancel
+											Zrušit
 										</span>					
 									</div>
 								</div>
@@ -2355,7 +2349,7 @@
 							margin-bottom: 20px;
 							margin-left:90px;
 							">
-							Description
+							Popis
 							<br>
 							{% if the_obj.markdown %}
 								<pre>{{the_obj.markdown | safe }}</pre>
@@ -2381,7 +2375,7 @@
 					{% if user %}
 						<form method="post" action="/postcomment/">
 							<div class="combox">
-								Comment
+								Komentář
 								<br>
 								<br>
 								<textarea name="obj_comment_form"></textarea>
@@ -2391,7 +2385,7 @@
 								<input type="hidden" name="obj_id" value="{{obj_id}}">
 								<input type="hidden" name="verify" value="{{user_hash}}">
 								<span style="float:right;">
-									<input type="submit" value="Post" style="
+									<input type="submit" value="Poslat" style="
 									width:80px;
 									height:30px;
 									padding: 0.3em 0.6em;
@@ -2409,11 +2403,11 @@
 					{% else %}
 						<div style="margin-left:35px;">
 							<br>
-							You must
-							<a href="/login">log in</a>
-							or
-							<a href="/signup">sign up</a>
-							to comment.
+							Musíte se
+							<a href="/login">přihlásit</a>
+							nebo
+							<a href="/signup">registrovat</a>
+							,abyste mohli přidat komentář.
 						</div>
 					{% endif %}
 					<br>
@@ -2443,16 +2437,16 @@
 				<div style="float: left; margin: 20px;">
 					<br>
 					<h1>
-						This item is unavailable.
+						Tento soubor není dostupný.
 					</h1>
 					<br>
 					{% if the_obj.deleted %}
 						<h2>
-							It has been deleted.
+							Byl vymazán
 						</h2>
 					{% elif the_obj.under_review %}
 						<h2>
-							It is under review.
+							Nebo je právě upravován.
 						</h2>
 					{% endif %}
 				</div>

@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>
-		Blog Sign Up
+		Registrace Blogu 
 	</title>
 	<style>
 		* {
@@ -72,7 +72,7 @@
 					action="{{photo_upload_url}}" enctype="multipart/form-data">
 					-->
 					<div class="sign_up">
-						Sign up
+						Registrovat
 					</div>
 					<br>
 					{% if error %}
@@ -82,7 +82,7 @@
 						<br>
 					{% endif %}
 					<input type="hidden" name="next_url" value='{{next_url}}'>
-					Name
+					Jméno
 					<br>
 					<input onkeypress="return event.keyCode != 13;" type="text" name="username" value='{{username}}'
 						style="
@@ -91,11 +91,11 @@
 						">
 					<br>
 					<span style="font-size:8px; color: #666">
-						At least 4 chars long. Use only letters, numbers, "-" or "_".
+						Nejméně 4 znaky. Pouze čísla, písmena "_,-".
 					</span>			
 					<br>
 					<br>
-					Password
+					Heslo
 					<br>
 					<input onkeypress="return event.keyCode != 13;" type="password" name="password"
 						style="
@@ -104,11 +104,11 @@
 						">
 					<br>
 					<span style="font-size:8px; color: #666">
-						At least 6 chars long. Longer is obviously more secure.
+						Nejméně 6 znaků.
 					</span>	
 					<br>
 					<br>
-					Verify password
+					Potvrdit heslo
 					<br>
 					<input onkeypress="return event.keyCode != 13;" type="password" name="verify"
 						style="
@@ -127,14 +127,14 @@
 						margin-left: 10px;
 						margin-bottom: 20px;
 						">
-						I am over 18 and agree to the 
-						<a href="/tos" target="_blank">terms of service</a>. (Required)
+						Je mi více než 18 let a souhlasím s 
+						<a href="/tos" target="_blank">podmínkami použití</a>. (nutné)
 					</span>
 					<br>
 					<br>
 					<br>
 
-					Email (optional)
+					Email (volitelné)
 					<input onkeypress="return event.keyCode != 13;" type="text" name="email" value='{{email}}'
 						style="
 						color: #0077cc;
@@ -152,9 +152,9 @@
 						margin-left: 10px;
 						margin-bottom: 20px;
 						">
-						I prefer infinite scroll
+						Preferuji nekonečné "scrolování "
 						<br>
-						(you can edit this later).
+						(můžete později změnit).
 					</span>
 					<br>
 					<br>
@@ -170,7 +170,7 @@
 						margin-left: 10px;
 						margin-bottom: 15px;
 						">
-						Optional: I want to filter content that may be inappropriate for children.
+						Volitelné: Chci filtrovat soubory nevhodné pro děti.
 					</span>
 					<br>
 					<br>
@@ -201,9 +201,9 @@
 							">
 					<br>
 					<div class="lower_text">
-						<a href="/login">Log in</a>
-						or return to the
-						<a href="/">Main Page</a>.
+						<a href="/login">Přihlásit se</a>
+						nebo se navrátit na
+						<a href="/">hlavní stránku.</a>.
 
 					</div>
 				</form>

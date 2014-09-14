@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>
-		Bld3r | {{title}} Wiki History
+		Cool3D | {{title}} Wiki Historie
 	</title>
 	{% include "scripts.html" %}
 	<meta name="description" content="Bld3r.com is a 3D printing community for both beginners and enthusiasts. Maybe you have creations you want to share with others, or maybe you just want to learn how to do basic 3D modeling or find out which printer is right for you. We like to print in 3D, and we want to make it easier for everyone." />
@@ -49,12 +49,12 @@
 	<div class="menu">
 		{% if has_cookie %}
 		<a href="/_edit/{{title}}">
-			Edit
+			Upravit
 		</a>
 		|
 		{% endif %}
 		<a href="/w/{{title}}">
-			Current Version
+			Nynější verze
 		</a>
 	</div>
 	
@@ -73,11 +73,11 @@
 				</li>
 			</ul>
 			<div name="modified">
-				Updated {{page.time_since}} ago.
+				Změněno před {{page.time_since}}.
 			</div>
 			{% if page.reverter_name %}
 				<div name="reverted">
-					reverted by: {{page.reverter_name}}
+					Vráceno: {{page.reverter_name}}
 				</div>
 			{% endif %}
 			{% if has_cookie %}

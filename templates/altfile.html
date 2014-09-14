@@ -3,7 +3,7 @@
 <head>
 	
 	<title>
-		Bld3r Upload Step 1
+		Cool3D nahrání souboru krok 1
 	</title>
 	{% include "scripts.html" %}
 		
@@ -74,7 +74,7 @@
 			<div class="top" style="width:1000px; margin-top:20px;">
 				<img src="/img/up.ico" width="100px" height="auto" />
 				<div>
-					Alternate file for {{obj.title}}	
+					Alternativní soubor k {{obj.title}}	
 				</div>
 			</div>
 			<div style="padding-top:10px;clear:both;">
@@ -107,11 +107,11 @@
 							</tr>
 							<tr>
 								<td>
-									Alternate File:
+									Alternativní soubor:
 
 								</td>
 								<td>
-									Please try and use a descriptive filename
+									Prosím vyberte subor, jehož název dobře popisuje jeho vlastnosti
 									<br>
 									<input type="file" name="file" value="{{main_file}}">
 									{% if file_error %}
@@ -126,15 +126,15 @@
 										</div>
 									{% endif %}
 									<br>
-									.stl or .openscad (currently) &lt; 5mb only
+									.stl nebo .openscad  &lt; 5mb 
 								</td>
 							</tr>
 							<tr>
 								<td>
-									Copyright
+									Práva
 								</td>
 								<td>
-									By submitting this file, you submit it with the same license as the main submission:
+									Sdílením tohoto souboru ho sdílíte pod stejnou licencí, jako první soubor:
 									<br>
 									<br>
 									<span style="color: red;">
@@ -143,7 +143,7 @@
 									<br>
 									<br>
 									<input type="checkbox" name="rights" value="yes" {% if rights %} checked {% endif %}>
-									Sharing this file complies with the <a href="/tos" target="_blank">terms of service</a>, and I am submitting it with the license above.
+									Ukládíáním tohoto souboru souhlasíte <a href="/tos" target="_blank">s podmínkami použití</a>, a licencí výše.
 									{% if error_3 %}
 										{% if not file_error %}
 											<br>
@@ -191,10 +191,10 @@
 					text-align: left;
 					">
 					<span class="delete_section">
-						Delete one of the additional files. 
+						Vymazat soubor
 						<br>
 						<span style="font-size: 10px;">
-							To remove the primary file, you must delete the object.
+							K vymazání hlavního souboru musíte odstranit tento objekt.
 						</span>
 					</span>
 					<form method="post">
